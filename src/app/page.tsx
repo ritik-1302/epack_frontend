@@ -17,7 +17,7 @@ const Home = () => {
 
     try{
       console.log("Hadling auth");
-      const response = await fetch("http://http://13.233.201.77//login", {
+      const response = await fetch("http://13.233.201.77/login", {
         headers:{'content-type': 'application/json'},
         
         method: "POST",

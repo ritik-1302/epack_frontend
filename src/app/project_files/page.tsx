@@ -19,7 +19,7 @@ const ProjectFiles = () => {
      const projectname=localStorage.getItem('projectname')
      try {
        const response = await fetch(
-         `http://http://13.233.201.77//get_project_files?projectname=${projectname}`,
+         `http://13.233.201.77/get_project_files?projectname=${projectname}`,
          {
            method: "GET",
          }

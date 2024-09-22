@@ -15,7 +15,7 @@ const Page = () => {
 
     try {
       const response = await fetch(
-        `http://http://13.233.201.77//get_projects?username=${username}`,
+        `http://13.233.201.77/get_projects?username=${username}`,
         {
           method: "GET",
         }

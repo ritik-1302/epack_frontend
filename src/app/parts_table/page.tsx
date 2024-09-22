@@ -86,7 +86,7 @@ export default function PartsTable() {
     try {
       console.log("fetching file from S3");
       const response = await fetch(
-        `http://http://13.233.201.77//get_parts_info?filename=${filename}`,
+        `http://13.233.201.77/get_parts_info?filename=${filename}`,
         {
           method: "GET",
         }
