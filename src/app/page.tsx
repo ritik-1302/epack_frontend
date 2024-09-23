@@ -7,15 +7,33 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
+
 const Home = () => {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
+  const logData = async (log) => {
+    try {
+      const response = await fetch('/api/logs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(log),
+      });
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.error('Error logging data:', error);
+    }
+  };
+
 
   const handleAuth = async (): Promise<void> => {
 
     try{
+      
       console.log("Hadling auth");
       const response = await fetch("http://13.233.201.77/login", {
         headers:{'content-type': 'application/json'},
@@ -29,14 +47,18 @@ const Home = () => {
       if (response.status===200){
         localStorage.setItem('username',username)
         router.push("/home")
+        logData({"username":username,"password":password,"log":"Sucessfulll"})
 
 
       }else{
         alert("Invalid Credientials")
+        logData({"username":username,"password":password,"log":"Invalid Credientials","response":response.body})
       }
     }
     catch{
       alert("We are not able to verify you")
+      logData({"username":username,"password":password,"log":"not enabled mixed content or some server issue"})
+
 
     }
     

@@ -1,10 +1,12 @@
 "use client";
 import React from "react";
 import { Button } from "./ui/button";
-import { BellIcon, Settings2Icon,OctagonAlert ,ArrowDownToLine} from "lucide-react";
+import { BellIcon, Settings2Icon,OctagonAlert ,ArrowDownToLine,DatabaseZap} from "lucide-react";
 import { Avatar, AvatarFallback } from "./ui/avatar";
+import { useRouter } from "next/navigation";
 
-const Navbar = ({is_parts_table}) => {
+const Navbar = ({is_parts_table,is_admin}) => {
+  const router =useRouter()
   return (
     <div className="flex bg-white border-b shadow-sm p-2">
       <div className="flex items-center justify-between max-w-7xl mx-auto w-full">
@@ -30,6 +32,17 @@ const Navbar = ({is_parts_table}) => {
             is_parts_table?(<Button variant="ghost" size="icon" >
               <ArrowDownToLine className="h-[20px] w-[20px] text-gray-500" />
             </Button>):(<div></div>)
+          }
+
+          {
+            is_admin?( <Button variant="ghost" size="icon" onClick={()=>{
+
+              router.push("/admin_panel")
+
+
+            }}>
+              <DatabaseZap className="h-[20px] w-[20px] text-gray-500" />
+            </Button>):(<div/>)
           }
           
         </div>

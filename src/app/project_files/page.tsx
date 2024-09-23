@@ -46,7 +46,7 @@ const ProjectFiles = () => {
     },[])
   return (
     <div>
-      <Navbar is_parts_table={false} />
+      <Navbar is_parts_table={false} is_admin={localStorage.getItem("username")==='epack'?(true):(false)}/>
       <div className="max-w-6xl mx-auto mt-14">
         <div className="flex flex-col gap-4">
           <h1 className="text-4xl font-bold">Project Files</h1>

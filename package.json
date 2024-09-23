@@ -29,6 +29,8 @@
     "jspdf": "^2.5.2",
     "lucide-react": "^0.377.0",
     "md5": "^2.3.0",
+    "mongodb": "^6.9.0",
+    "net": "^1.0.2",
     "next": "^14.2.3",
     "plotly.js": "^2.32.0",
     "react": "^18",
@@ -45,7 +47,6 @@
     "xlsx": "^0.18.5",
     "zustand": "^4.5.2"
   },
-
   "overrides": {
     "@radix-ui/react-focus-scope": "1.1.0"
   },

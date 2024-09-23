@@ -210,7 +210,7 @@ export default function PartsTable() {
   
   return (
     <div ref={componentRef}>
-      <Navbar is_parts_table={true} />
+      <Navbar is_parts_table={true} is_admin={localStorage.getItem("username")==='epack'?(true):(false)}/>
 
       {data["data"] ? (
         <div>
@@ -249,7 +249,6 @@ export default function PartsTable() {
             
           </div>
 
-          {/* Buttons for adjusting table size */}
           <div style={floatingButtonStyles}>
             <button style={moveButtonStyles} onClick={increaseTableSize}>
               +
