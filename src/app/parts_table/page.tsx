@@ -77,6 +77,7 @@ export default function PartsTable() {
   const [expandAll, setExpandAll] = useState(false); // State to expand all sides during print
   const componentRef = useRef(null); // Reference for printing
   let elements: any[] | undefined = [];
+  const [username, setUsername] = useState(""); 
 
 
 
@@ -151,6 +152,8 @@ export default function PartsTable() {
 
 
   useEffect(() => {
+  const user_name=localStorage.getItem("username") as string
+  setUsername(user_name)
     loadData();
   }, []);
 
@@ -210,7 +213,7 @@ export default function PartsTable() {
   
   return (
     <div ref={componentRef}>
-      <Navbar is_parts_table={true} is_admin={localStorage.getItem("username")==='epack'?(true):(false)}/>
+      <Navbar is_parts_table={true} is_admin={username==='epack'?(true):(false)}/>
 
       {data["data"] ? (
         <div>

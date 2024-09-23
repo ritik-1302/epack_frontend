@@ -8,10 +8,11 @@ import React, { useState, useEffect } from "react";
 const Page = () => {
   const [projectList, setProjectList] = useState([]);
   const [loading,setLoading]=useState(false)
+  const [username,setUsername]=useState("")
 
   const loadData = async () => {
     
-    const username = localStorage.getItem("username");
+   
 
     try {
       const response = await fetch(
@@ -36,6 +37,11 @@ const Page = () => {
     }
   };
 
+ useEffect(()=>{
+  const user_name = localStorage.getItem("username") as string
+  setUsername(user_name)
+
+ },[])
 
   useEffect(() => {
     loadData();
@@ -45,7 +51,7 @@ const Page = () => {
 
   return (
       <div>
-      <Navbar is_parts_table={false} is_admin={localStorage.getItem("username")==='epack'?(true):(false)} />
+      <Navbar is_parts_table={false} is_admin={username==='epack'?(true):(false)} />
       <div className="max-w-6xl mx-auto mt-14">
         <div className="flex flex-col zgap-4 mb-5">
           {/* <h1 className="text-4xl font-bold">Radha Swami,</h1> */}

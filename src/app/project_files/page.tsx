@@ -8,14 +8,15 @@ import { useRouter } from "next/navigation";
 
 const ProjectFiles = () => {
 
+
     const [loading,setLoading]=useState(false)
     const [filesList,setFilesList]=useState([])
+    const [username,setUsername]=useState("")
     const router = useRouter();
 
    
     const loadData  = async (): Promise<void> => {
      setLoading(true)
-     
      const projectname=localStorage.getItem('projectname')
      try {
        const response = await fetch(
@@ -42,11 +43,13 @@ const ProjectFiles = () => {
    
     }
     useEffect(()=>{
+     const user_name=localStorage.getItem("username") as string
+     setUsername(user_name)
         loadData()
     },[])
   return (
     <div>
-      <Navbar is_parts_table={false} is_admin={localStorage.getItem("username")==='epack'?(true):(false)}/>
+      <Navbar is_parts_table={false} is_admin={username==='epack'?(true):(false)}/>
       <div className="max-w-6xl mx-auto mt-14">
         <div className="flex flex-col gap-4">
           <h1 className="text-4xl font-bold">Project Files</h1>
