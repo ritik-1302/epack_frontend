@@ -12,11 +12,11 @@ const Page = () => {
 
   const loadData = async () => {
     
-   
+    const user_name = localStorage.getItem("username") as string
 
     try {
       const response = await fetch(
-        `http://13.233.201.77/get_projects?username=${username}`,
+        `http://13.233.201.77/get_projects?username=${user_name}`,
         {
           method: "GET",
         }
@@ -37,13 +37,14 @@ const Page = () => {
     }
   };
 
- useEffect(()=>{
-  const user_name = localStorage.getItem("username") as string
-  setUsername(user_name)
-
- },[])
+//  useEffect(()=>{
+  
+//  },[])
 
   useEffect(() => {
+    const user_name = localStorage.getItem("username") as string
+    setUsername(user_name)
+
     loadData();
   },[]);
 
