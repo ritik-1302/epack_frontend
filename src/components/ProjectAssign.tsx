@@ -29,6 +29,9 @@ export function ProjectAssign({ project_list, user_list }) {
  
   const [projects,setProjects]=useState<{ [key: string]: boolean }>({})
   const [users,setUsers]=useState<{ [key: string]: boolean }>({})
+  const [projectOpen, setProjectOpen] = useState(false);
+  const [userOpen, setUserOpen] = useState(false);
+
 
   
 
@@ -124,9 +127,9 @@ export function ProjectAssign({ project_list, user_list }) {
           <Label htmlFor="project" className="text-sm">
             Select Project
           </Label>
-          <DropdownMenu>
+          <DropdownMenu open={projectOpen} >
       <DropdownMenuTrigger asChild>
-        <Button variant="outline"></Button>
+        <Button variant="outline" onClick={()=>setProjectOpen((prev)=>!prev)}></Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuLabel>Projects</DropdownMenuLabel>
@@ -136,12 +139,14 @@ export function ProjectAssign({ project_list, user_list }) {
             <DropdownMenuCheckboxItem
               key={project_name}
               checked={projects[project_name]}
-              onCheckedChange={() => {
+              onCheckedChange={(e) => {
                 setProjects((prevProjects) => ({
                   ...prevProjects,
                   [project_name]: !prevProjects[project_name],
                 }));
                 console.log(project_name);
+                // setOpen(e?true:false)
+
               }}
             >
               {project_name}
@@ -150,13 +155,13 @@ export function ProjectAssign({ project_list, user_list }) {
         
        
       </DropdownMenuContent>
-    </DropdownMenu>
+    </DropdownMenu >
           <Label htmlFor="username" className="text-sm">
             Select Username
           </Label>
-          <DropdownMenu>
+        <DropdownMenu open={userOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline"></Button>
+        <Button variant="outline" onClick={()=>setUserOpen((prev)=>!prev)} ></Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuLabel>Projects</DropdownMenuLabel>
@@ -164,6 +169,7 @@ export function ProjectAssign({ project_list, user_list }) {
         
         {user_list.map((user) => (
             <DropdownMenuCheckboxItem
+
               key={user}
               checked={users[user]}
               onCheckedChange={() => {
