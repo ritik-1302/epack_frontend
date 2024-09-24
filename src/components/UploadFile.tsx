@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/dialog";
 
 import CircularProgress from "@mui/material/CircularProgress";
-
 import Router, { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -56,6 +55,7 @@ export function UploadFile({ project_list }) {
       setFile(event.target.files[0]);
     }
   };
+ 
 
   //uploads the file in the server as well as uploads it in S3 Storage
   const handleUpload = async (): Promise<void> => {
@@ -75,6 +75,7 @@ export function UploadFile({ project_list }) {
     formData.append("density", density);
     formData.append("height", window.innerHeight.toString());
     formData.append("width", window.innerWidth.toString());
+    formData.append("filename",uploadedFile.name)
     if (newProjectName === "") {
       formData.append("projectName", existingProject);
     } else {
@@ -84,8 +85,9 @@ export function UploadFile({ project_list }) {
         const response = await fetch("http://13.233.201.77/add_project", {
           method: "POST",
           body: JSON.stringify({
-            username: localStorage.getItem("username"),
-            projectname: newProjectName,
+            username: [localStorage.getItem("username")],
+            projectname: [newProjectName],
+            isnew:true
           }),
           headers: { "content-type": "application/json" },
         });

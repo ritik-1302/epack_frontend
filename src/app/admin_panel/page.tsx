@@ -1,20 +1,78 @@
 "use client";
 import Navbar from "@/components/Navbar";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-  } from "@/components/ui/dialog";
+import { ProjectAssign } from "@/components/ProjectAssign";
+import { RegisterUser } from "@/components/RegisterUser";
+
 import { useEffect, useState } from "react";
 
+
+
+
+
+
 export default function AdminPanel(){
+    const [allProjectList,setAllProjectList]=useState([])
+    const [allUsersList,setAllUsersList]=useState([])
     const [username,setUsername]=useState("")
 
+    const loadData = async () => {
+    
+        const user_name = localStorage.getItem("username") as string
+        //get projects    
+        try {
+          const response = await fetch(
+            `http://13.233.201.77/get_projects?username=${user_name}`,
+            {
+              method: "GET",
+            }
+          );
+          if (response.status == 200) {
+            const json_body = await response.json();
+            console.log(json_body)
+            setAllProjectList(json_body["project_list"])
+
+            
+            
+          }else{
+            alert("No such user exists")
+          }
+        } catch (error) {
+          alert("Unable to fetch project List")
+        }finally{
+          
+        }  
+        //get all users
+        try {
+            const response = await fetch(
+              `http://13.233.201.77/get_all_users`,
+              {
+                method: "GET",
+              }
+            );
+            if (response.status == 200) {
+              const json_body = await response.json();
+              console.log(json_body)
+              setAllUsersList(json_body["data"])
+  
+              
+              
+            }else{
+              alert("Some error occuered")
+            }
+          } catch (error) {
+            alert("Unable to fetch User List")
+          }finally{
+            
+          }
+
+
+
+      };
+
+
+
     useEffect(()=>{
+        loadData()
 
         const user_name=localStorage.getItem("username") as string
         setUsername(user_name)
@@ -31,8 +89,9 @@ export default function AdminPanel(){
           <h1 className="text-4xl font-bold">Admin Panel</h1>
 
           <div className="grid grid-cols-2 gap-4">
-            {/* <UploadFile project_list={projectList} />
-            <ProjectSelection project_list={projectList}/> */}
+            <RegisterUser/>
+            <ProjectAssign project_list={allProjectList} user_list={allUsersList}/>
+            
           </div>
           
         </div>

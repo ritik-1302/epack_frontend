@@ -35,7 +35,7 @@ const ProjectFiles = () => {
          alert("No such user exists")
        }
      } catch (error) {
-       alert("Unable to fetch project  file List")
+       alert("Unable to fetch project file List")
      }finally{
        setLoading(false)
      }

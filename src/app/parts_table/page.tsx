@@ -79,8 +79,59 @@ export default function PartsTable() {
   let elements: any[] | undefined = [];
   const [username, setUsername] = useState(""); 
 
-
-
+  const handleExcelDownload = async (): Promise<void> => {
+    const filename = localStorage.getItem("filename");
+  
+    try {
+      console.log("Fetching file from S3...");
+      const response = await fetch(
+        `http://13.233.201.77/download_boq?filename=${filename}`,
+        {
+          method: "GET",
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error(`Error fetching file: ${response.statusText}`);
+      }
+  
+      // Extract the file name from the Content-Disposition header
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let downloadFilename = "boq.xlsx"; // Fallback in case the header is not set
+  
+      if (contentDisposition && contentDisposition.includes('filename=')) {
+        // Extract filename from 'Content-Disposition' header
+        downloadFilename = contentDisposition
+          .split('filename=')[1]
+          .trim()
+          .replace(/"/g, ""); // Remove any quotes
+      }
+  
+      // Get the file data as a Blob (Binary Large Object)
+      const blob = await response.blob();
+  
+      // Create a temporary URL for the Blob
+      const url = window.URL.createObjectURL(blob);
+  
+      // Create a link element to download the file
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = downloadFilename; // Set the dynamically fetched filename
+      document.body.appendChild(link);
+  
+      // Programmatically click the link to trigger the download
+      link.click();
+  
+      // Clean up by removing the link and revoking the URL
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+  
+      console.log("File downloaded successfully");
+    } catch (error) {
+      console.error("Error retrieving file:", error);
+      alert("Couldn't download your file");
+    }
+  };
  const loadData = async (): Promise<void> => {
     const filename = localStorage.getItem("filename");
 
@@ -261,8 +312,8 @@ export default function PartsTable() {
             </button>
 
           
-            <button style={moveButtonStyles} onClick={handlePrint}>
-              Download as PDF
+            <button style={moveButtonStyles} onClick={handleExcelDownload}>
+              Download Excel
             </button>
           </div>
         </div>
