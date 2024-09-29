@@ -34,8 +34,11 @@ export default function PartsTable() {
   const [phase, setPhase] = useState("PHASE_1");
   const [phaseList, setPhaseList] = useState<string[]>([]);
   const [trigger, setTriggerRerender] = useState(false);
-  const [dimensions,setDimensions]=useState<{width:string|null,height:string|null}>({width:null,height:null})
-  const [isPrinting,setIsPrinting]=useState(false)
+  const [dimensions, setDimensions] = useState<{
+    width: string | null;
+    height: string | null;
+  }>({ width: null, height: null });
+  const [isPrinting, setIsPrinting] = useState(false);
 
   const floatingButtonStyles: CSSProperties = {
     position: "fixed",
@@ -63,7 +66,7 @@ export default function PartsTable() {
     backgroundColor: "rgba(255, 255, 255, 0.4)", // More opaque white on hover
     transform: "scale(1.05)", // Slightly enlarge the button on hover
   };
-  
+
   const handleExcelDownload = async (): Promise<void> => {
     const filename = localStorage.getItem("filename");
 
@@ -129,16 +132,15 @@ export default function PartsTable() {
     documentTitle: "PartsTable",
     onBeforeGetContent: () => {
       return new Promise((resolve) => {
-        setIsPrinting(true)
-        
+        setIsPrinting(true);
+
         setTimeout(resolve, 1000);
       });
     },
 
-    onAfterPrint:()=>{
-      setIsPrinting(false)
-    }
-   
+    onAfterPrint: () => {
+      setIsPrinting(false);
+    },
   });
 
   const loadData = async (): Promise<void> => {
@@ -159,20 +161,18 @@ export default function PartsTable() {
         let i = 0;
         let res: string[] = [];
 
-        Object.entries(json_body).forEach(([k, v]) => {
-          Object.entries(v as Record<string, object>).forEach(
-            ([key, value]) => {
-              if (i <= 0) {
-                Object.entries(value["phase"]).forEach(([ke, val]) => {
-                  res.push(ke);
-                });
-              }
-              i += 1;
-            }
-          );
-        });
-
-        
+        // {Object.entries(data).map(([k, v]) =>
+        //   Object.entries(v as Record<string, object>).map(([key, value]) => (
+        //     <div key={key} onMouseMove={() => setHoveredKey(key)}>
+        //       <SvgwithTable
+        //         block_name={key}
+        //         parts_object={value}
+        //         tablesize={tableSizes[key]}
+        //         phase_qty={value["phase"][phase]}
+        //       />
+        //     </div>
+        //   ))
+        // )};
 
         setPhaseList(res);
         console.log(res);
@@ -196,18 +196,18 @@ export default function PartsTable() {
       }
     }
   };
-    const getSvgDimensions = (svgStr) => {
+  const getSvgDimensions = (svgStr) => {
     const parser = new DOMParser();
     const svgDoc = parser.parseFromString(svgStr, "image/svg+xml");
-    const svgElement = svgDoc.querySelector('svg');
+    const svgElement = svgDoc.querySelector("svg");
 
     if (svgElement) {
-      const width = svgElement.getAttribute('width');
-      const height = svgElement.getAttribute('height');
+      const width = svgElement.getAttribute("width");
+      const height = svgElement.getAttribute("height");
       return { width, height };
     }
     return { width: null, height: null };
-  }
+  };
   const decreaseTableSize = () => {
     if (hoveredKey) {
       setTableSizes((prevSizes) => ({
@@ -224,118 +224,110 @@ export default function PartsTable() {
     setTriggerRerender((prev) => !prev); // Toggle the state to cause rerender
   };
 
- 
-
   useEffect(() => {
-   
     if (Object.keys(data).length > 0) {
       Object.entries(data).forEach(([k, v]) => {
         Object.entries(v as Record<string, object>).forEach(([key, value]) => {
-         
-          const dimensions =getSvgDimensions(value['image_url'])
-          setDimensions({height:dimensions.height,width:dimensions.width})
+          const dimensions = getSvgDimensions(value["image_url"]);
+          setDimensions({ height: dimensions.height, width: dimensions.width });
           setTableSizes((prevSizes) => ({
             ...prevSizes,
             [key]: 0.5,
           }));
-
-
-
-
         });
       });
     }
-
-   
   }, [data, trigger]);
-
 
   useEffect(() => {
     const user_name = localStorage.getItem("username") as string;
     setUsername(user_name);
     loadData();
-    
   }, [trigger]);
 
   return (
     <div>
-      <Navbar
-        is_parts_table={true}
-        is_admin={username === "epack" ? true : false}
-      />
+      <Navbar is_parts_table={true} is_admin={username === "epack"} />
       {data["data"] ? (
-        <div ref={componentRef}>
-          {Object.entries(data).map(([k, v]) =>
-            Object.entries(v as Record<string, object>).map(([key, value]) => (
-              <div key={key} onMouseMove={() => setHoveredKey(key)}>
-                <SvgwithTable
-                  block_name={key}
-                  parts_object={value}
-                  tablesize={tableSizes[key]}
-                  phase_qty={value["phase"][phase]}
-                  
-                />
-              </div>
-            ))
+        <>
+          <div ref={componentRef}>
+            <div
+              style={{ display: "flex", gap: "10px", flexDirection: "column" }}
+            >
+              {Object.entries(data).map(([k, v]) =>
+                Object.entries(v as Record<string, object>).map(
+                  ([key, value]) => (
+                    <div key={key} onMouseMove={() => setHoveredKey(key)}>
+                      <SvgwithTable
+                        block_name={key}
+                        parts_object={value}
+                        tablesize={tableSizes[key]}
+                        phase_qty={value["phase"][phase]}
+                      />
+                    </div>
+                  )
+                )
+              )}
+            </div>
+          </div>
+          {isPrinting ? null : (
+            <div style={floatingButtonStyles}>
+              <button style={moveButtonStyles} onClick={increaseTableSize}>
+                +
+              </button>
+              <button style={moveButtonStyles} onClick={decreaseTableSize}>
+                -
+              </button>
+              <button style={moveButtonStyles} onClick={handlePrint}>
+                Print Button
+              </button>
+              <button style={moveButtonStyles} onClick={handleExcelDownload}>
+                Print BOQ
+              </button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button style={moveButtonStyles}>Select Phase</button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle className="">Register</DialogTitle>
+                    <DialogDescription className="">
+                      Select Phase
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <Label htmlFor="username" className="text-sm">
+                      Select Phase
+                    </Label>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline">{phase}</Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-56">
+                        <DropdownMenuLabel>Select Project</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuRadioGroup
+                          value={phase}
+                          onValueChange={setPhase}
+                        >
+                          {phaseList.map((phase) => (
+                            <DropdownMenuRadioItem
+                              key={phase}
+                              value={phase}
+                              onClick={handleRerender}
+                            >
+                              {phase}
+                            </DropdownMenuRadioItem>
+                          ))}
+                        </DropdownMenuRadioGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
           )}
-
-        {isPrinting?(<div/>):(<div style={floatingButtonStyles}>
-            <button style={moveButtonStyles} onClick={increaseTableSize} >
-              +
-            </button>
-            <button style={moveButtonStyles} onClick={decreaseTableSize}>
-              -
-            </button>
-            <button style={moveButtonStyles} onClick={handlePrint}>
-              Print Button
-            </button>
-            <button style={moveButtonStyles} onClick={handleExcelDownload}>
-              Print BOQ
-            </button>
-            <Dialog>
-              <DialogTrigger asChild>
-                <button style={moveButtonStyles}>Select Phase</button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle className="">Register</DialogTitle>
-                  <DialogDescription className="">
-                    Select Phase
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <Label htmlFor="username" className="text-sm">
-                    Select Phase
-                  </Label>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline">{phase}</Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56">
-                      <DropdownMenuLabel>Select Project</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuRadioGroup
-                        value={phase}
-                        onValueChange={setPhase}
-                      >
-                        {phaseList.map((phase) => (
-                          <DropdownMenuRadioItem
-                            key={phase}
-                            value={phase}
-                            onClick={handleRerender}
-                          >
-                            {phase}
-                          </DropdownMenuRadioItem>
-                        ))}
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>)}
-          
-        </div>
+        </>
       ) : (
         <CircularProgress></CircularProgress>
       )}
