@@ -55,7 +55,7 @@ const Page = () => {
         <div className="flex flex-col zgap-4 mb-5">
           {/* <h1 className="text-4xl font-bold">Radha Swami,</h1> */}
           
-          <h1 className="text-4xl font-bold">Welcome,</h1>
+          <h1 className="text-4xl font-bold mb-3">Welcome</h1>
 
           <div className="grid grid-cols-2 gap-4">
             <UploadFile project_list={projectList} />

@@ -6,75 +6,77 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-
+import Image from "next/image";
+import logo from "../../assets/epack_logo.webp";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const Home = () => {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const logData = async (log) => {
     try {
-      const response = await fetch('/api/logs', {
-        method: 'POST',
+      const response = await fetch("/api/logs", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(log),
       });
       const data = await response.json();
       console.log(data);
     } catch (error) {
-      console.error('Error logging data:', error);
+      console.error("Error logging data:", error);
     }
   };
 
-
   const handleAuth = async (): Promise<void> => {
-
-    try{
-      
+    try {
+      setLoading(true);
       console.log("Hadling auth");
       const response = await fetch("http://13.233.201.77/login", {
-        headers:{'content-type': 'application/json'},
-        
+        headers: { "content-type": "application/json" },
+
         method: "POST",
-        body: JSON.stringify({"username":username,"password":password})
+        body: JSON.stringify({ username: username, password: password }),
       });
 
-      
-
-
-
-      
-
-      if (response.status===200){
-        localStorage.setItem('username',username)
-        router.push("/home")
-        logData({"username":username,"password":password,"log":"Sucessfulll"})
-
-
-      }else{
-        alert("Invalid Credientials")
-        logData({"username":username,"password":password,"log":"Invalid Credientials","response":response.status})
+      if (response.status === 200) {
+        localStorage.setItem("username", username);
+        router.push("/home");
+        logData({ username: username, password: password, log: "Sucessfulll" });
+      } else {
+        alert("Invalid Credientials");
+        logData({
+          username: username,
+          password: password,
+          log: "Invalid Credientials",
+          response: response.status,
+        });
       }
+    } catch {
+      alert("We are not able to verify you");
+      logData({
+        username: username,
+        password: password,
+        log: "not enabled mixed content or some server issue",
+      });
+    } finally {
+      setLoading(false);
     }
-    catch{
-      alert("We are not able to verify you")
-      logData({"username":username,"password":password,"log":"not enabled mixed content or some server issue"})
-
-
-    }
-    
-    
-    }
-
-
-
+  };
 
   return (
     <div className="h-screen flex flex-col gap-5 items-center justify-center">
-      <h1 className="text-5xl font-bold text-gray-900">EPack</h1>
+      <div className="flex items-center space-x-4">
+        <Image
+          src={logo}
+          alt="EPack Logo"
+          className="w-auto h-16 object-cover"
+        />
+      </div>
       <div className="mt-[24px] flex flex-col items-center gap-2 text-center">
         <h1 className="text-[30px] font-semibold text-heading text-[#101828]">
           Log in to your account
@@ -108,24 +110,16 @@ const Home = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <div className="flex items-center justify-between w-full  max-w-sm mx-auto">
-          <div className="flex items-center space-x-2">
-            <Checkbox id="save" className="text-[#D0D5DD]" />
-            <label
-              htmlFor="save"
-              className="text-[14px] font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[#344054]"
-            >
-              Remember for 30 days
-            </label>
-          </div>
-          
-        </div>
-        <Button
-          className=" max-w-sm mx-auto w-full"
-          onClick={handleAuth}
-        >
-          Log In
+
+        <Button className=" max-w-sm mx-auto w-full" onClick={handleAuth}>
+          {loading ? <CircularProgress size={20} color="inherit" /> : "Log In"}
         </Button>
+        <p className="text-[14px] font-normal text-[#101828] absolute bottom-5">
+          Having login issues?{" "}
+          <a href="mailto:gadodiahemant123@gmail.com" className="text-blue-500">
+            Contact Admin
+          </a>
+        </p>
       </div>
     </div>
   );

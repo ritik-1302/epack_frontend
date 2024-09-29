@@ -55,13 +55,21 @@ export function UploadFile({ project_list }) {
       setFile(event.target.files[0]);
     }
   };
- 
 
   //uploads the file in the server as well as uploads it in S3 Storage
   const handleUpload = async (): Promise<void> => {
     if (!uploadedFile) {
-      alert("PLease select a file to upload")
+      alert("PLease select a file to upload");
       console.error("");
+      return;
+    }
+    try {
+      if (uploadedFile.name.split(".")[1] !== "dxf") {
+        alert("Please upload a .dxf file");
+        return;
+      }
+    } catch {
+      alert("Please upload proper file");
       return;
     }
     if (newProjectName === "" && existingProject === "") {
@@ -69,9 +77,17 @@ export function UploadFile({ project_list }) {
       return;
     }
 
-    if(density.trim()===""){
-      alert("please fill the density")
-      return
+    if (density.trim() === "" || isNaN(parseInt(density))) {
+      alert("Please enter proper value for density");
+      return;
+    }
+
+    if (
+      existingProject === "New Project" &&
+      (newProjectName.trim() === "" || newProjectName === "New Project")
+    ) {
+      alert("Please enter proper project name");
+      return;
     }
 
     const formData = new FormData();
@@ -81,7 +97,7 @@ export function UploadFile({ project_list }) {
     formData.append("density", density);
     formData.append("height", window.innerHeight.toString());
     formData.append("width", window.innerWidth.toString());
-    formData.append("filename",uploadedFile.name)
+    formData.append("filename", uploadedFile.name);
     if (newProjectName === "") {
       formData.append("projectName", existingProject);
     } else {
@@ -93,7 +109,7 @@ export function UploadFile({ project_list }) {
           body: JSON.stringify({
             username: [localStorage.getItem("username")],
             projectname: [newProjectName],
-            isnew:true
+            isnew: true,
           }),
           headers: { "content-type": "application/json" },
         });
@@ -104,7 +120,7 @@ export function UploadFile({ project_list }) {
         if (response.status === 200) {
           console.log("new project creation sucess");
         } else {
-          alert("Bad request please re-check the form")
+          alert("Bad request please re-check the form");
           console.log("new project creation failed");
           return;
         }
@@ -134,14 +150,14 @@ export function UploadFile({ project_list }) {
         setLoading(false);
         router.push("/parts_table");
       } else {
-        alert("Please fill all the entries")
+        alert("Please fill all the entries");
         console.error("Data format is incorrect");
       }
     } catch (error) {
-      alert("Unable to upload your dxf files")
+      alert("Unable to upload your dxf files");
       console.error("Error uploading file:", error);
-    }finally{
-      setLoading(false)
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -198,7 +214,7 @@ export function UploadFile({ project_list }) {
                   or drag and drop
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  DXF (max. 1mb)
+                  DXF (max. 10mb)
                 </p>
               </div>
             </label>
@@ -231,7 +247,7 @@ export function UploadFile({ project_list }) {
                 onValueChange={setExistingProject}
               >
                 <DropdownMenuRadioItem value="New Project">
-                  New Project
+                  ➕ New Project
                 </DropdownMenuRadioItem>
                 {project_list.map((project) => (
                   <DropdownMenuRadioItem key={project} value={project}>
@@ -262,8 +278,7 @@ export function UploadFile({ project_list }) {
           >
             {loading ? (
               <div className="flex items-center justify-center">
-                <WatchIcon size={16} />
-                <span className="ml-2">Uploading...</span>
+                <CircularProgress size={20} color="inherit" />
               </div>
             ) : (
               "Upload"
