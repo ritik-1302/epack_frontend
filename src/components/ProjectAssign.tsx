@@ -24,13 +24,15 @@ import { Button } from "@/components/ui/button";
 import { FolderKanban } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
+import { Fascinate } from "next/font/google";
 
-export function ProjectAssign({ project_list, user_list }) {
+export function ProjectAssign({ project_list, user_list,refresh_trigger }) {
  
   const [projects,setProjects]=useState<{ [key: string]: boolean }>({})
   const [users,setUsers]=useState<{ [key: string]: boolean }>({})
   const [projectOpen, setProjectOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
+  const [dialogOpen,setDialogOpen]=useState(false)
 
 
   
@@ -95,13 +97,12 @@ export function ProjectAssign({ project_list, user_list }) {
 
   }
 
- 
-
- 
-
   return (
-    <Dialog>
-      <DialogTrigger asChild>
+    <Dialog onOpenChange={()=>{
+      setProjectOpen(false)
+      setUserOpen(false)
+    }}>
+      <DialogTrigger asChild >
         <div className="w-[436px] cursor-pointer p-[20px] border border-gray-300 rounded-md shadow-sm flex items-center gap-3">
           <div className="p-[12px] border border-gray-300 rounded-md shadow-sm">
             <FolderKanban size={16} />
@@ -128,8 +129,8 @@ export function ProjectAssign({ project_list, user_list }) {
             Select Project
           </Label>
           <DropdownMenu open={projectOpen} >
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" onClick={()=>setProjectOpen((prev)=>!prev)}></Button>
+      <DropdownMenuTrigger asChild >
+        <Button variant="outline" onClick={()=>setProjectOpen((prev)=>!prev)} ></Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuLabel>Projects</DropdownMenuLabel>

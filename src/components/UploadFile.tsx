@@ -60,12 +60,18 @@ export function UploadFile({ project_list }) {
   //uploads the file in the server as well as uploads it in S3 Storage
   const handleUpload = async (): Promise<void> => {
     if (!uploadedFile) {
+      alert("PLease select a file to upload")
       console.error("");
       return;
     }
     if (newProjectName === "" && existingProject === "") {
       alert("Please select the project Name");
       return;
+    }
+
+    if(density.trim()===""){
+      alert("please fill the density")
+      return
     }
 
     const formData = new FormData();
@@ -98,6 +104,7 @@ export function UploadFile({ project_list }) {
         if (response.status === 200) {
           console.log("new project creation sucess");
         } else {
+          alert("Bad request please re-check the form")
           console.log("new project creation failed");
           return;
         }
@@ -127,10 +134,14 @@ export function UploadFile({ project_list }) {
         setLoading(false);
         router.push("/parts_table");
       } else {
+        alert("Please fill all the entries")
         console.error("Data format is incorrect");
       }
     } catch (error) {
+      alert("Unable to upload your dxf files")
       console.error("Error uploading file:", error);
+    }finally{
+      setLoading(false)
     }
   };
 

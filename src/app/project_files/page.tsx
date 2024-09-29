@@ -57,8 +57,8 @@ const ProjectFiles = () => {
           {loading?(<CircularProgress/>):(<div/>)}
 
           {filesList.map((file) => (
-                  <div key={file} className="w-full border border-gray-300 p-[16px] flex items-center justify-between" onClick={()=>{
-                    localStorage.setItem("filename", file);
+                  <div key={file["hashed_file_name"]} className="w-full border border-gray-300 p-[16px] flex items-center justify-between" onClick={()=>{
+                    localStorage.setItem("filename", file["hashed_file_name"]);
 
                     router.push("/parts_table");
                   }}>
@@ -67,7 +67,7 @@ const ProjectFiles = () => {
                       <FileBarChart2 size={16} />
                     </div>
                     <div className="flex flex-col">
-                      <h1 className="text-gray-700 text-[20px] font-semibold">{file}</h1>
+                      <h1 className="text-gray-700 text-[20px] font-semibold">{file["orginal_file_name"]}</h1>
                     </div>
                   </div>
                 </div>

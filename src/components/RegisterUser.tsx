@@ -18,12 +18,13 @@ import { ChangeEvent, useEffect, useState } from "react";
 
 
 
-export function RegisterUser() {
+export function RegisterUser({refresh_trigger}) {
   const [username,setUsername]=useState("")
   const [password,setPassword]=useState("")
-  
+  const [loading,setLoading]=useState(false)
 
   const handleRegister  = async (): Promise<void> => {
+    setLoading(true)
     try{
       const response = await fetch(
         `http://13.233.201.77/register`,
@@ -36,6 +37,7 @@ export function RegisterUser() {
 
       if (response.status===201){
         alert("User Registerd Sucessfully")
+        refresh_trigger()
 
       }else{
         alert("User Already Registerd")
@@ -43,13 +45,17 @@ export function RegisterUser() {
       }
     }catch{
       
-      alert("Not able to register anay user")
+      alert("Not able to register any user")
+    }finally{
+      setLoading(false)
     }
 
-
-
-
   }
+
+  useEffect(()=>{
+
+  },[loading])
+  
 
   return (
     <Dialog>

@@ -1,138 +1,133 @@
-
 "use client";
-
 import React, { useEffect, useState, CSSProperties, useRef } from "react";
 import Navbar from "../../components/Navbar";
 import CircularProgress from "@mui/material/CircularProgress";
-import { Carousel } from "react-responsive-carousel";
-import "react-responsive-carousel/lib/styles/carousel.min.css";
-import { Rnd } from "react-rnd";
 import { useReactToPrint } from "react-to-print";
-
+import { SvgwithTable } from "@/components/SvgwithTable";
 import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../../components/ui/table";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-const tableHeaderList = [
-  "Part Name",
-  "Thickness",
-  "Quantity",
-  "Length (mm)",
-  "Width (mm)",
-  "Area (m2)",
-  "Volume (m3)",
-  "Weight (kg)",
-];
-
-const arrowStyles: CSSProperties = {
-  color: "red",
-  position: "absolute",
-  zIndex: 2,
-  top: "calc(50%)",
-  width: 100,
-  height: 50,
-  cursor: "pointer",
-  fontSize: "30px",
-};
-
-const svgStyles: CSSProperties = {
-  display: "flex",
-  justifyContent: "center",
-  alignContent: "center",
-  objectFit: "contain",
-  maxHeight: "20%",
-  top: "10px",
-  left: "10px",
-};
-
-const floatingButtonStyles: CSSProperties = {
-  position: "fixed",
-  bottom: "20px",
-  right: "20px",
-  zIndex: 999,
-  display: "flex",
-  flexDirection: "column",
-};
-
-const moveButtonStyles: CSSProperties = {
-  marginBottom: "10px",
-  padding: "10px",
-  fontSize: "20px",
-  backgroundColor: "gray",
-  color: "white",
-  border: "none",
-  cursor: "pointer",
-};
-
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 export default function PartsTable() {
   const [data, setData] = useState({});
+  const [username, setUsername] = useState("");
+  const componentRef = useRef(null);
   const [tableSizes, setTableSizes] = useState<{ [key: string]: number }>({});
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
-  const [expandAll, setExpandAll] = useState(false); // State to expand all sides during print
-  const componentRef = useRef(null); // Reference for printing
-  let elements: any[] | undefined = [];
-  const [username, setUsername] = useState(""); 
+  const [phase, setPhase] = useState("PHASE_1");
+  const [phaseList, setPhaseList] = useState<string[]>([]);
+  const [trigger, setTriggerRerender] = useState(false);
+  const [dimensions,setDimensions]=useState<{width:string|null,height:string|null}>({width:null,height:null})
+
+  const floatingButtonStyles: CSSProperties = {
+    position: "fixed",
+    bottom: "20px",
+    right: "20px",
+    zIndex: 999,
+    display: "flex",
+    flexDirection: "column",
+  };
+
+  const moveButtonStyles: CSSProperties = {
+    marginBottom: "10px",
+    padding: "10px",
+    fontSize: "20px",
+    backgroundColor: "gray",
+    color: "white",
+    border: "none",
+    cursor: "pointer",
+  };
 
   const handleExcelDownload = async (): Promise<void> => {
     const filename = localStorage.getItem("filename");
-  
+
     try {
       console.log("Fetching file from S3...");
       const response = await fetch(
-        `http://13.233.201.77/download_boq?filename=${filename}`,
+        `http://13.233.201.77/download_boq?filename=${filename}&phase=${phase}`,
         {
           method: "GET",
         }
       );
-  
+
       if (!response.ok) {
+        alert("Error in downloading BOQ");
         throw new Error(`Error fetching file: ${response.statusText}`);
       }
-  
+
       // Extract the file name from the Content-Disposition header
-      const contentDisposition = response.headers.get('Content-Disposition');
+      const contentDisposition = response.headers.get("Content-Disposition");
       let downloadFilename = "boq.xlsx"; // Fallback in case the header is not set
-  
-      if (contentDisposition && contentDisposition.includes('filename=')) {
+
+      if (contentDisposition && contentDisposition.includes("filename=")) {
         // Extract filename from 'Content-Disposition' header
         downloadFilename = contentDisposition
-          .split('filename=')[1]
+          .split("filename=")[1]
           .trim()
           .replace(/"/g, ""); // Remove any quotes
       }
-  
+
       // Get the file data as a Blob (Binary Large Object)
       const blob = await response.blob();
-  
+
       // Create a temporary URL for the Blob
       const url = window.URL.createObjectURL(blob);
-  
+
       // Create a link element to download the file
       const link = document.createElement("a");
       link.href = url;
       link.download = downloadFilename; // Set the dynamically fetched filename
       document.body.appendChild(link);
-  
+
       // Programmatically click the link to trigger the download
       link.click();
-  
+
       // Clean up by removing the link and revoking the URL
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-  
+
       console.log("File downloaded successfully");
     } catch (error) {
       console.error("Error retrieving file:", error);
       alert("Couldn't download your file");
     }
   };
- const loadData = async (): Promise<void> => {
+
+  const handlePrint = useReactToPrint({
+    pageStyle: `@media print {
+      @page {
+        size: ${dimensions.width}  ${dimensions.height};
+      }
+    }`,
+    content: () => componentRef.current,
+    documentTitle: "PartsTable",
+    onBeforeGetContent: () => {
+      return new Promise((resolve) => {
+        
+        setTimeout(resolve, 1000);
+      });
+    },
+   
+  });
+
+  const loadData = async (): Promise<void> => {
     const filename = localStorage.getItem("filename");
 
     try {
@@ -146,163 +141,129 @@ export default function PartsTable() {
       if (response.status == 200) {
         const json_body = await response.json();
         setData(json_body);
+
+        let i = 0;
+        let res: string[] = [];
+
+        Object.entries(json_body).forEach(([k, v]) => {
+          Object.entries(v as Record<string, object>).forEach(
+            ([key, value]) => {
+              if (i <= 0) {
+                Object.entries(value["phase"]).forEach(([ke, val]) => {
+                  res.push(ke);
+                });
+              }
+              i += 1;
+            }
+          );
+        });
+
+        
+
+        setPhaseList(res);
+        console.log(res);
+      } else {
+        alert("No such file exist in the Cloud");
       }
     } catch (error) {
+      alert("Not able to retrieve your DXF file");
       console.error("Error retrieving file:", error);
     }
   };
-
   const increaseTableSize = () => {
     if (hoveredKey) {
       setTableSizes((prevSizes) => ({
         ...prevSizes,
-        [hoveredKey]: (prevSizes[hoveredKey] || 1) + 0.05, 
+        [hoveredKey]: (prevSizes[hoveredKey] || 0.5) + 0.05,
       }));
 
-
-      if (tableSizes[hoveredKey]>1.2){
-        alert("Scaling too High")
+      if (tableSizes[hoveredKey] > 1) {
+        alert("Scaling too High");
       }
-
-      
-      
     }
   };
+    const getSvgDimensions = (svgStr) => {
+    const parser = new DOMParser();
+    const svgDoc = parser.parseFromString(svgStr, "image/svg+xml");
+    const svgElement = svgDoc.querySelector('svg');
 
+    if (svgElement) {
+      const width = svgElement.getAttribute('width');
+      const height = svgElement.getAttribute('height');
+      return { width, height };
+    }
+    return { width: null, height: null };
+  }
   const decreaseTableSize = () => {
     if (hoveredKey) {
       setTableSizes((prevSizes) => ({
         ...prevSizes,
-        [hoveredKey]: (prevSizes[hoveredKey] || 1) - 0.05, 
+        [hoveredKey]: (prevSizes[hoveredKey] || 0.5) - 0.05,
       }));
 
-      if (tableSizes[hoveredKey]<0.5){
-        alert("Scaling too Low")
+      if (tableSizes[hoveredKey] < 0.2) {
+        alert("Scaling too Low");
       }
     }
   };
+  const handleRerender = () => {
+    setTriggerRerender((prev) => !prev); // Toggle the state to cause rerender
+  };
 
-  
-  const handlePrint = useReactToPrint({
-    
-    content: () => componentRef.current, // Target the component for printing
-    documentTitle: 'PartsTable', // Optional: name of the PDF file
-    onBeforeGetContent: () => {
-      
-      // Expand all sides before printing
-      return new Promise((resolve) => {
-        setExpandAll(true);
-        setTimeout(resolve, 0); // Allow some time to apply the changes before print
+ 
+
+  useEffect(() => {
+   
+    if (Object.keys(data).length > 0) {
+      Object.entries(data).forEach(([k, v]) => {
+        Object.entries(v as Record<string, object>).forEach(([key, value]) => {
+         
+          const dimensions =getSvgDimensions(value['image_url'])
+          setDimensions({height:dimensions.height,width:dimensions.width})
+          setTableSizes((prevSizes) => ({
+            ...prevSizes,
+            [key]: 0.5,
+          }));
+
+
+
+
+        });
       });
-    },
-    onAfterPrint: () => {
-      // Reset the state after printing
-      setExpandAll(false);
-    },
-  });
+    }
+
+   
+  }, [data, trigger]);
 
 
   useEffect(() => {
-  const user_name=localStorage.getItem("username") as string
-  setUsername(user_name)
+    const user_name = localStorage.getItem("username") as string;
+    setUsername(user_name);
     loadData();
-  }, []);
+    
+  }, [trigger]);
 
-  let i = 0;
-  Object.entries(data as object).forEach(([k, v]) => {
-    Object.entries(v as Record<string, object>).forEach(([key, value]) => {
-      const tableSize = tableSizes[key] || 1;
-
-      const svgString = value["image_url"];
-      elements.push(
-        <div key={i} onMouseMove={() => setHoveredKey(key)}>
-          <div
-            style={svgStyles}
-            dangerouslySetInnerHTML={{ __html: svgString }}
-          />
-          <Rnd style={{ padding: "10px" }} >
-            <Table
-              style={{
-                backgroundColor: "rgba(255, 255, 255, 0.8)",
-                scale: tableSize,
-              }}
-            >
-              <TableCaption>{key}</TableCaption>
-              <TableHeader>
-                <TableRow>
-                  {tableHeaderList.map((header) => (
-                    <TableHead className="text-center" key={header}>
-                      {header}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {value["parts"].map((parts) => (
-                  <TableRow key={parts["Part Name"]}>
-                    <TableCell className="font-medium">
-                      {parts["Part Name"]}
-                    </TableCell>
-                    <TableCell>{parts["Thickness (mm)"]}</TableCell>
-                    <TableCell>{parts["Quantity"]}</TableCell>
-                    <TableCell>{parts["Length (mm)"]}</TableCell>
-                    <TableCell>{parts["Width (mm)"]}</TableCell>
-                    <TableCell>{parts["Area (m2)"]}</TableCell>
-                    <TableCell>{parts["Volume (m3)"]}</TableCell>
-                    <TableCell>{parts["Weight (kg)"]}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Rnd>
-        </div>
-      );
-      i = i + 1;
-    });
-  });
-
-  
   return (
-    <div ref={componentRef}>
-      <Navbar is_parts_table={true} is_admin={username==='epack'?(true):(false)}/>
-
+    <div>
+      <Navbar
+        is_parts_table={true}
+        is_admin={username === "epack" ? true : false}
+      />
       {data["data"] ? (
-        <div>
-          <div  
-          > 
-
-            {expandAll?(elements):(<Carousel
-              showIndicators={false}
-              renderArrowPrev={(onClickHandler, hasPrev, label) =>
-                hasPrev && (
-                  <button
-                    type="button"
-                    onClick={onClickHandler}
-                    title={label}
-                    style={{ ...arrowStyles, left: 30 }}
-                  >
-                    &larr;
-                  </button>
-                )
-              }
-              renderArrowNext={(onClickHandler, hasNext, label) =>
-                hasNext && (
-                  <button
-                    type="button"
-                    onClick={onClickHandler}
-                    title={label}
-                    style={{ ...arrowStyles, right: 30 }}
-                  >
-                    &rarr;
-                  </button>
-                )
-              }
-            >
-              {elements} 
-            </Carousel >)}
-            
-          </div>
-
+        <div ref={componentRef}>
+          {Object.entries(data).map(([k, v]) =>
+            Object.entries(v as Record<string, object>).map(([key, value]) => (
+              <div key={key} onMouseMove={() => setHoveredKey(key)}>
+                <SvgwithTable
+                  block_name={key}
+                  parts_object={value}
+                  tablesize={tableSizes[key]}
+                  phase_qty={value["phase"][phase]}
+                  
+                />
+              </div>
+            ))
+          )}
           <div style={floatingButtonStyles}>
             <button style={moveButtonStyles} onClick={increaseTableSize}>
               +
@@ -310,17 +271,58 @@ export default function PartsTable() {
             <button style={moveButtonStyles} onClick={decreaseTableSize}>
               -
             </button>
-
-          
-            <button style={moveButtonStyles} onClick={handleExcelDownload}>
-              Download Excel
+            <button style={moveButtonStyles} onClick={handlePrint}>
+              Print Button
             </button>
+            <button style={moveButtonStyles} onClick={handleExcelDownload}>
+              Print BOQ
+            </button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <button style={moveButtonStyles}>Select Phase</button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle className="">Register</DialogTitle>
+                  <DialogDescription className="">
+                    Select Phase
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <Label htmlFor="username" className="text-sm">
+                    Select Phase
+                  </Label>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline">{phase}</Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56">
+                      <DropdownMenuLabel>Select Project</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuRadioGroup
+                        value={phase}
+                        onValueChange={setPhase}
+                      >
+                        {phaseList.map((phase) => (
+                          <DropdownMenuRadioItem
+                            key={phase}
+                            value={phase}
+                            onClick={handleRerender}
+                          >
+                            {phase}
+                          </DropdownMenuRadioItem>
+                        ))}
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       ) : (
-        <CircularProgress />
+        <CircularProgress></CircularProgress>
       )}
     </div>
   );
 }
-
