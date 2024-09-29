@@ -35,6 +35,7 @@ export default function PartsTable() {
   const [phaseList, setPhaseList] = useState<string[]>([]);
   const [trigger, setTriggerRerender] = useState(false);
   const [dimensions,setDimensions]=useState<{width:string|null,height:string|null}>({width:null,height:null})
+  const [isPrinting,setIsPrinting]=useState(false)
 
   const floatingButtonStyles: CSSProperties = {
     position: "fixed",
@@ -47,14 +48,22 @@ export default function PartsTable() {
 
   const moveButtonStyles: CSSProperties = {
     marginBottom: "10px",
-    padding: "10px",
+    padding: "10px 20px", // Increased horizontal padding
     fontSize: "20px",
-    backgroundColor: "gray",
-    color: "white",
+    backgroundColor: "rgba(255, 255, 255, 0.2)", // Semi-transparent white
+    color: "white", // Solid white text for readability
     border: "none",
+    borderRadius: "5px", // Rounded corners
     cursor: "pointer",
+    transition: "background-color 0.3s, transform 0.2s", // Smooth transition for hover effects
+    boxShadow: "0 4px 10px rgba(0, 0, 0, 0.5)", // Deeper shadow for contrast
   };
 
+  const moveButtonHoverStyles: CSSProperties = {
+    backgroundColor: "rgba(255, 255, 255, 0.4)", // More opaque white on hover
+    transform: "scale(1.05)", // Slightly enlarge the button on hover
+  };
+  
   const handleExcelDownload = async (): Promise<void> => {
     const filename = localStorage.getItem("filename");
 
@@ -120,10 +129,15 @@ export default function PartsTable() {
     documentTitle: "PartsTable",
     onBeforeGetContent: () => {
       return new Promise((resolve) => {
+        setIsPrinting(true)
         
         setTimeout(resolve, 1000);
       });
     },
+
+    onAfterPrint:()=>{
+      setIsPrinting(false)
+    }
    
   });
 
@@ -264,8 +278,9 @@ export default function PartsTable() {
               </div>
             ))
           )}
-          <div style={floatingButtonStyles}>
-            <button style={moveButtonStyles} onClick={increaseTableSize}>
+
+        {isPrinting?(<div/>):(<div style={floatingButtonStyles}>
+            <button style={moveButtonStyles} onClick={increaseTableSize} >
               +
             </button>
             <button style={moveButtonStyles} onClick={decreaseTableSize}>
@@ -318,7 +333,8 @@ export default function PartsTable() {
                 </div>
               </DialogContent>
             </Dialog>
-          </div>
+          </div>)}
+          
         </div>
       ) : (
         <CircularProgress></CircularProgress>

@@ -1,7 +1,9 @@
 "use client";
+import DeleteProject from "@/components/DeleteProject";
 import Navbar from "@/components/Navbar";
 import { ProjectAssign } from "@/components/ProjectAssign";
 import { RegisterUser } from "@/components/RegisterUser";
+import RevokeProjectAcess from "@/components/RevokeProjectAcess";
 
 import { useEffect, useState } from "react";
 
@@ -13,6 +15,7 @@ import { useEffect, useState } from "react";
 export default function AdminPanel(){
     const [allProjectList,setAllProjectList]=useState([])
     const [allUsersList,setAllUsersList]=useState([])
+    const [projectAcessList,setProjectAcessList]=useState([])
     const [username,setUsername]=useState("")
     const [triggerRerender, setTriggerRerender] = useState(false)
 
@@ -66,6 +69,29 @@ export default function AdminPanel(){
             
           }
 
+          try {
+            const response = await fetch(
+              `http://13.233.201.77/get_project_access_list`,
+              {
+                method: "GET",
+              }
+            );
+            if (response.status == 200) {
+              const json_body = await response.json();
+              console.log(json_body)
+              setProjectAcessList(json_body["data"])
+  
+              
+              
+            }else{
+              alert("unable to fetch the list")
+            }
+          } catch (error) {
+            alert("Unable to fetch project List")
+          }finally{
+            
+          }
+
 
 
       };
@@ -93,6 +119,8 @@ export default function AdminPanel(){
           <div className="grid grid-cols-2 gap-4">
             <RegisterUser refresh_trigger={handleRerender}/>
             <ProjectAssign project_list={allProjectList} user_list={allUsersList} refresh_trigger={handleRerender}/>
+            <RevokeProjectAcess project_acess_list={projectAcessList} refresh_trgger={handleRerender}  />
+            <DeleteProject project_list={allProjectList} refresh_trigger={handleRerender}/>
             
           </div>
           

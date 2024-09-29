@@ -2,7 +2,7 @@
 import Navbar from "@/components/Navbar";
 import { ProjectSelection } from "@/components/ProjectSelection";
 import { UploadFile } from "@/components/UploadFile";
-import { CircleArrowUp, Ellipsis, FileBarChart2 } from "lucide-react";
+import {  Ellipsis, FileBarChart2 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 
 const Page = () => {
@@ -37,9 +37,7 @@ const Page = () => {
     }
   };
 
-//  useEffect(()=>{
-  
-//  },[])
+
 
   useEffect(() => {
     const user_name = localStorage.getItem("username") as string

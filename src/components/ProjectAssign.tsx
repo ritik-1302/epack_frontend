@@ -23,8 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { FolderKanban } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import { useEffect, useState } from "react";
-import { Fascinate } from "next/font/google";
+import {  useState } from "react";
 
 export function ProjectAssign({ project_list, user_list,refresh_trigger }) {
  
@@ -32,7 +31,6 @@ export function ProjectAssign({ project_list, user_list,refresh_trigger }) {
   const [users,setUsers]=useState<{ [key: string]: boolean }>({})
   const [projectOpen, setProjectOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
-  const [dialogOpen,setDialogOpen]=useState(false)
 
 
   
