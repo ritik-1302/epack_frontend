@@ -5,75 +5,82 @@ import { useEffect, useState } from "react";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useRouter } from "next/navigation";
 
-
 const ProjectFiles = () => {
+  const [loading, setLoading] = useState(false);
+  const [filesList, setFilesList] = useState([]);
+  const [username, setUsername] = useState("");
+  const router = useRouter();
 
-
-    const [loading,setLoading]=useState(false)
-    const [filesList,setFilesList]=useState([])
-    const [username,setUsername]=useState("")
-    const router = useRouter();
-
-   
-    const loadData  = async (): Promise<void> => {
-     setLoading(true)
-     const projectname=localStorage.getItem('projectname')
-     try {
-       const response = await fetch(
-         `http://13.233.201.77/get_project_files?projectname=${projectname}`,
-         {
-           method: "GET",
-         }
-       );
-       if (response.status == 200) {
-         const json_body = await response.json();
-         console.log(json_body)
-         setFilesList(json_body["data"])
-         
-         
-       }else{
-         alert("No such user exists")
-       }
-     } catch (error) {
-       alert("Unable to fetch project file List")
-     }finally{
-       setLoading(false)
-     }
-   
-   
+  const loadData = async (): Promise<void> => {
+    setLoading(true);
+    const projectname = localStorage.getItem("projectname");
+    try {
+      const response = await fetch(
+        `http://13.233.201.77/get_project_files?projectname=${projectname}`,
+        {
+          method: "GET",
+        }
+      );
+      if (response.status == 200) {
+        const json_body = await response.json();
+        console.log(json_body);
+        setFilesList(json_body["data"]);
+      } else {
+        alert("No such user exists");
+      }
+    } catch (error) {
+      alert("Unable to fetch project file List");
+    } finally {
+      setLoading(false);
     }
-    useEffect(()=>{
-     const user_name=localStorage.getItem("username") as string
-     setUsername(user_name)
-        loadData()
-    },[])
+  };
+  useEffect(() => {
+    const user_name = localStorage.getItem("username") as string;
+    setUsername(user_name);
+    loadData();
+  }, []);
   return (
     <div>
-      <Navbar is_parts_table={false} is_admin={username==='epack'?(true):(false)}/>
+      <Navbar
+        is_parts_table={false}
+        is_admin={username === "epack" ? true : false}
+      />
       <div className="max-w-6xl mx-auto mt-14">
         <div className="flex flex-col gap-4">
           <h1 className="text-4xl font-bold">Project Files</h1>
 
-          {loading?(<CircularProgress/>):(<div/>)}
-
-          {filesList.map((file) => (
-                  <div key={file["hashed_file_name"]} className="w-full border border-gray-300 p-[16px] flex items-center justify-between" onClick={()=>{
+          {loading ? <CircularProgress /> : <div />}
+          <div className="mb-5">
+            {filesList.length > 0 ? (
+              filesList.map((file) => (
+                <div
+                  key={file["hashed_file_name"]}
+                  className="w-full border border-gray-300 p-[16px] flex items-center justify-between mb-4 cursor-pointer"
+                  onClick={() => {
                     localStorage.setItem("filename", file["hashed_file_name"]);
-
                     router.push("/parts_table");
-                  }}>
+                  }}
+                >
                   <div className="flex items-center gap-5">
                     <div className="p-[12px] border bg-slate-100 border-gray-300 rounded-md shadow-sm">
                       <FileBarChart2 size={16} />
                     </div>
                     <div className="flex flex-col">
-                      <h1 className="text-gray-700 text-[20px] font-semibold">{file["orginal_file_name"]}</h1>
+                      <h1 className="text-gray-700 text-[20px] font-semibold">
+                        {file["orginal_file_name"]}
+                      </h1>
                     </div>
                   </div>
                 </div>
-                ))}
-
-          
+              ))
+            ) : (
+              <div className="w-full p-[16px] flex items-center justify-center">
+                <h1 className="text-gray-500 text-[20px] font-semibold">
+                  No files available
+                </h1>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
