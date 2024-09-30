@@ -62,7 +62,29 @@ const Page = () => {
   const [tableData, setTableData] = useState(hardCodedData);
 
   const loadData = async () => {
-    // ... (previous loadData function remains unchanged)
+    const user_name = localStorage.getItem("username") as string
+    try {
+      const response = await fetch(
+        `http://13.233.201.77/get_projects?username=${user_name}`,
+        {
+          method: "GET",
+        }
+      );
+      if (response.status == 200) {
+        const json_body = await response.json();
+        console.log(json_body)
+        setProjectList(json_body["project_list"])
+        
+        
+      }else{
+        alert("No such user exists")
+      }
+    } catch (error) {
+      alert("Unable to fetch project List")
+    }finally{
+      
+    }
+    
   };
 
   useEffect(() => {
