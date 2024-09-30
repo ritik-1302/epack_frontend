@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect, useMemo, useRef } from "react";
 import {
   MaterialReactTable,
@@ -13,9 +14,10 @@ export function SvgwithTable({
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
-
-  const columns = useMemo(
-    () => [
+  const data=parts_object["parts"]
+  
+  const columns = 
+    [
       {
         accessorKey: "Part Name",
         header: "Part Name",
@@ -31,7 +33,7 @@ export function SvgwithTable({
       {
         accessorKey: "QTY./BLDG.",
         header: "QTY./BLDG.",
-        accessorFn: (row) => row["Quantity"] * phase_qty,
+        accessorFn: (row)=>phase_qty*row["Quantity"]
       },
       {
         accessorKey: "Length (mm)",
@@ -53,37 +55,42 @@ export function SvgwithTable({
         accessorKey: "Weight (kg)",
         header: "Weight (kg)",
       },
-    ],
-    [phase_qty]
-  );
+    ]
 
-  const table = useMaterialReactTable({
-    columns,
-    data: parts_object["parts"],
-    enablePagination: false,
-    muiTableBodyRowProps: { hover: false },
-    muiTableProps: {
-      sx: {
-        border: "1px solid rgba(81, 81, 81, .5)",
-        caption: { captionSide: "top" },
+    const table = useMaterialReactTable({
+      columns,
+      data: data,
+      enablePagination: false,
+      muiTableBodyRowProps: { hover: false },
+      muiTableProps: {
+        sx: {
+          border: "1px solid rgba(81, 81, 81, .5)",
+          caption: { captionSide: "top" },
+        },
       },
-    },
-    muiTableHeadCellProps: {
-      sx: {
-        border: "1px solid rgba(81, 81, 81, .5)",
-        fontStyle: "italic",
-        fontWeight: "normal",
+      muiTableHeadCellProps: {
+        sx: {
+          border: "1px solid rgba(81, 81, 81, .5)",
+          fontStyle: "italic",
+          fontWeight: "normal",
+        },
       },
-    },
-    muiTableBodyCellProps: {
-      sx: { border: "1px solid rgba(81, 81, 81, .5)" },
-    },
-    enableColumnOrdering: true,
-  });
+      muiTableBodyCellProps: {
+        sx: { border: "1px solid rgba(81, 81, 81, .5)" },
+      },
+      enableColumnOrdering: true,
+  
+    },);
+
+
+
+  
 
   useEffect(() => {
+
     const canvas = canvasRef.current;
     if (canvas) {
+
       const ctx = canvas.getContext("2d");
 
       // Parse the SVG string
@@ -121,7 +128,9 @@ export function SvgwithTable({
       };
       img.src = blobURL;
     }
-  }, [parts_object]);
+
+    
+  }, [parts_object,phase_qty]);
 
   return (
     <div
@@ -152,7 +161,8 @@ export function SvgwithTable({
             width: "fit-content",
           }}
         >
-          <MaterialReactTable key={block_name} table={table} />
+          <MaterialReactTable table={table} key={`${block_name}`}></MaterialReactTable>
+          
         </div>
       </Rnd>
     </div>
