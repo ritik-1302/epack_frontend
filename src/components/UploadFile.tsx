@@ -25,6 +25,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import baseURL from "@/utils/constants";
 
 export function UploadFile({ project_list }) {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -98,13 +99,14 @@ export function UploadFile({ project_list }) {
     formData.append("height", window.innerHeight.toString());
     formData.append("width", window.innerWidth.toString());
     formData.append("filename", uploadedFile.name);
+    formData.append("username", localStorage.getItem("username")!);
     if (newProjectName === "") {
       formData.append("projectName", existingProject);
     } else {
       formData.append("projectName", newProjectName);
       try {
         console.log("adding new project in db");
-        const response = await fetch("http://13.233.201.77/add_project", {
+        const response = await fetch(`${baseURL}/add_project`, {
           method: "POST",
           body: JSON.stringify({
             username: [localStorage.getItem("username")],
@@ -133,7 +135,7 @@ export function UploadFile({ project_list }) {
 
     try {
       console.log("Uploading file:", formData.get("file"));
-      const response = await fetch("http://13.233.201.77/get_dxf_info", {
+      const response = await fetch(`${baseURL}/get_dxf_info`, {
         method: "POST",
         body: formData,
       });
@@ -150,7 +152,7 @@ export function UploadFile({ project_list }) {
         setLoading(false);
         router.push("/parts_table");
       } else {
-        alert("Please fill all the entries");
+        alert("Please upload a dxf file with proper format");
         console.error("Data format is incorrect");
       }
     } catch (error) {

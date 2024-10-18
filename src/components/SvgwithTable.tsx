@@ -11,6 +11,7 @@ export function SvgwithTable({
   parts_object,
   tablesize,
   phase_qty,
+  dark_mode
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
@@ -61,6 +62,13 @@ export function SvgwithTable({
       columns,
       data: data,
       enablePagination: false,
+      renderTopToolbarCustomActions: ({ table }) => (
+        <div>
+          {block_name}
+        </div>
+      
+      ),
+      
       muiTableBodyRowProps: { hover: false },
       muiTableProps: {
         sx: {
@@ -138,6 +146,7 @@ export function SvgwithTable({
         position: "relative",
         width: canvasSize.width,
         height: canvasSize.height,
+       filter: dark_mode ? "invert(1) hue-rotate(180deg)" : "none",
       }}
     >
       <canvas ref={canvasRef} />
@@ -159,6 +168,8 @@ export function SvgwithTable({
             transform: `scale(${tablesize})`,
             transformOrigin: "top left",
             width: "fit-content",
+            filter: dark_mode ? "invert(1) hue-rotate(180deg)" : "none",
+           
           }}
         >
           <MaterialReactTable table={table} key={`${block_name}`}></MaterialReactTable>

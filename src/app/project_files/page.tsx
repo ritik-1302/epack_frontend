@@ -4,6 +4,7 @@ import { CircleArrowUp, Ellipsis, FileBarChart2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useRouter } from "next/navigation";
+import baseURL from "@/utils/constants";
 
 const ProjectFiles = () => {
   const [loading, setLoading] = useState(false);
@@ -16,15 +17,16 @@ const ProjectFiles = () => {
     const projectname = localStorage.getItem("projectname");
     try {
       const response = await fetch(
-        `http://13.233.201.77/get_project_files?projectname=${projectname}`,
+        `${baseURL}/get_project_files?projectname=${projectname}`,
         {
           method: "GET",
         }
       );
       if (response.status == 200) {
         const json_body = await response.json();
+
         console.log(json_body);
-        setFilesList(json_body["data"]);
+        setFilesList(json_body["data"]===null?([]):(json_body["data"]));
       } else {
         alert("No such user exists");
       }
@@ -49,8 +51,7 @@ const ProjectFiles = () => {
         <div className="flex flex-col gap-4">
           <h1 className="text-4xl font-bold">Project Files</h1>
 
-          {loading ? <CircularProgress /> : <div />}
-          <div className="mb-5">
+          {loading ? <CircularProgress /> :  <div className="mb-5">
             {filesList.length > 0 ? (
               filesList.map((file) => (
                 <div
@@ -62,14 +63,28 @@ const ProjectFiles = () => {
                   }}
                 >
                   <div className="flex items-center gap-5">
-                    <div className="p-[12px] border bg-slate-100 border-gray-300 rounded-md shadow-sm">
-                      <FileBarChart2 size={16} />
+                    <div className="p-[25px] border bg-slate-100 border-gray-300 rounded-md shadow-sm">
+                      <FileBarChart2 size={25} />
                     </div>
                     <div className="flex flex-col">
+                      <h1 className="text-black-700 text-[20px] font-semibold">
+                        {file["orginal_file_name"]}
+                      </h1>
+                      <h1 className="text-gray-800 text-[15px]">
+                          {file["username"]}
+                       
+                      </h1>
+                      <h1 className="text-gray-500 text-[12px]">
+                          {file["time"]}
+                       
+                      </h1>
+                      
+                    </div>
+                    {/* <div className="flex flex-col">
                       <h1 className="text-gray-700 text-[20px] font-semibold">
                         {file["orginal_file_name"]}
                       </h1>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               ))
@@ -80,7 +95,8 @@ const ProjectFiles = () => {
                 </h1>
               </div>
             )}
-          </div>
+          </div>}
+         
         </div>
       </div>
     </div>

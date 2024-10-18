@@ -26,6 +26,7 @@ import {
 
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import baseURL from "@/utils/constants";
 export default function PartsTable() {
   const [data, setData] = useState({});
   const [username, setUsername] = useState("");
@@ -40,6 +41,7 @@ export default function PartsTable() {
     height: string | null;
   }>({ width: null, height: null });
   const [isPrinting, setIsPrinting] = useState(false);
+  const [isDarkMode,setIsDarkMode]=useState(false);
 
   const floatingButtonStyles: CSSProperties = {
     position: "fixed",
@@ -54,13 +56,16 @@ export default function PartsTable() {
     marginBottom: "10px",
     padding: "10px 20px", // Increased horizontal padding
     fontSize: "20px",
-    backgroundColor: "rgba(255, 255, 255, 0.2)", // Semi-transparent white
-    color: "white", // Solid white text for readability
+    backgroundColor: "rgba(255, 255, 255, 1)", // Semi-transparent white
+    color: "black", // Solid white text for readability
     border: "none",
     borderRadius: "5px", // Rounded corners
     cursor: "pointer",
     transition: "background-color 0.3s, transform 0.2s", // Smooth transition for hover effects
-    boxShadow: "0 4px 10px rgba(0, 0, 0, 0.5)", // Deeper shadow for contrast
+    boxShadow: "0 4px 10px rgba(0, 0, 0, 0.5)",
+    filter: isDarkMode ? "invert(1) hue-rotate(180deg)" : "none",
+    
+    // Deeper shadow for contrast
   };
 
 
@@ -70,7 +75,7 @@ export default function PartsTable() {
     try {
       console.log("Fetching file from S3...");
       const response = await fetch(
-        `http://13.233.201.77/download_boq?filename=${filename}&phase=${phase}`,
+        `${baseURL}/download_boq?filename=${filename}&phase=${phase}`,
         {
           method: "GET",
         }
@@ -146,7 +151,7 @@ export default function PartsTable() {
     try {
       console.log("fetching file from S3");
       const response = await fetch(
-        `http://13.233.201.77/get_parts_info?filename=${filename}`,
+        `${baseURL}/get_parts_info?filename=${filename}`,
         {
           method: "GET",
         }
@@ -238,11 +243,15 @@ export default function PartsTable() {
   }, [trigger]);
 
   return (
-    <div>
+    <div >
       <Navbar is_parts_table={true} is_admin={username === "epack"} />
       {data["data"] ? (
         <>
-          <div ref={componentRef}>
+          <div style={{
+      overflowX:"hidden",
+      overflowY:"hidden"
+    }} 
+    ref={componentRef}>
             <div
               style={{ display: "flex", gap: "10px", flexDirection: "column" }}
             >
@@ -256,6 +265,7 @@ export default function PartsTable() {
                         parts_object={value}
                         tablesize={tableSizes[key]}
                         phase_qty={value["phase"][phase]}
+                        dark_mode={isDarkMode}
                       />
                     </div>
                   )
@@ -265,6 +275,9 @@ export default function PartsTable() {
           </div>
           {isPrinting ? null : (
             <div style={floatingButtonStyles}>
+               <button style={moveButtonStyles} onClick={()=>setIsDarkMode((prev)=>!prev)}>
+                Toggle Dark/Light Mode
+              </button>
               <button style={moveButtonStyles} onClick={increaseTableSize}>
                 +
               </button>

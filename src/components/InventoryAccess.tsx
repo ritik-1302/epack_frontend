@@ -1,5 +1,4 @@
 
-import { Delete } from "lucide-react";
 import {
     Dialog,
     DialogContent,
@@ -12,42 +11,42 @@ import {
   import {
       DropdownMenu,
       DropdownMenuContent,
-      DropdownMenuItem,
       DropdownMenuLabel,
       DropdownMenuSeparator,
       DropdownMenuTrigger,
       DropdownMenuRadioGroup,
       DropdownMenuRadioItem,
-      DropdownMenuCheckboxItem,
      
       
   } from "@/components/ui/dropdown-menu";
   import { Button } from "@/components/ui/button";
-  import { Trash } from "lucide-react";
+  import {  Warehouse } from "lucide-react";
   import { Label } from "@/components/ui/label";
   import {  useState } from "react";
 import baseURL from "@/utils/constants";
 import { CircularProgress } from "@mui/material";
 
-export default function DeleteProject({project_list,refresh_trigger}){
+export default function InventoryAccess({user_list,refresh_trigger}){
 
-    const [project,setProject]=useState("")
+    const [user,setUser]=useState("")
     const [loading,setLoading]=useState(false)
 
-    const handleDeleteProject = async (): Promise<void> => {
+    const handleInventoryAcesss = async (): Promise<void> => {
 
       setLoading(true)
         try{
             const response = await fetch(
-              `${baseURL}/remove_project?projectname=${project}`,
+              `${baseURL}/update_inventory_access`,
               {
-                method: "DELETE",
+                headers:{'content-type': 'application/json'},
+                method: "POST",
+                body: JSON.stringify({"username":[user]})
                 
               }  
             );
       
             if (response.status===200){
-              alert("Sucessfully deleted the project")
+              alert("Sucessfully gave Access to the Inventory")
       
             }else{
               alert("BAD request")
@@ -55,11 +54,11 @@ export default function DeleteProject({project_list,refresh_trigger}){
             }
           }catch{
             
-            alert("Unable to delete the project as of right now")
+            alert("Unable to give inventory access as of right now")
           }
           finally{
 
-            setProject("")
+            setUser("")
             setLoading(false)
             refresh_trigger()
 
@@ -73,41 +72,41 @@ export default function DeleteProject({project_list,refresh_trigger}){
         <DialogTrigger asChild >
           <div className="w-[436px] cursor-pointer p-[20px] border border-gray-300 rounded-md shadow-sm flex items-center gap-3">
             <div className="p-[12px] border border-gray-300 rounded-md shadow-sm">
-              <Trash size={16} />
+              <Warehouse size={16} />
             </div>
             <div className="flex flex-col">
               <h1 className="text-gray-700 text-[16px] font-semibold">
-               Delete Project
+               Inventory Access
               </h1>
               <h1 className="text-[14px] font-normal text-gray-600">
-                Delete a exisitng project
+                Give Inventory Access to a user
               </h1>
             </div>
           </div>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle className="">Delete Project</DialogTitle>
+            <DialogTitle className="">Inventory Access</DialogTitle>
             <DialogDescription className="">
-            Delete a exisitng project
+            Update Inventory Access
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <Label htmlFor="project" className="text-sm">
-              Select Project
+              Select User
             </Label>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline">{project || "Select a project"}</Button>
+                <Button variant="outline">{user || "Select a User"}</Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56 max-h-60 overflow-y-auto">
-                <DropdownMenuLabel>Project</DropdownMenuLabel>
+                <DropdownMenuLabel>Users</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuRadioGroup value={project} onValueChange={(value)=>{
-                    setProject(value)
+                <DropdownMenuRadioGroup value={user} onValueChange={(value)=>{
+                    setUser(value)
 
                 }}>
-                  {project_list.map((project) => (
+                  {user_list.map((project) => (
                     <DropdownMenuRadioItem
                       key={project}
                       value={project}
@@ -125,9 +124,9 @@ export default function DeleteProject({project_list,refresh_trigger}){
             <Button
               type="submit"
               className="w-full"
-              onClick={handleDeleteProject}
+              onClick={handleInventoryAcesss}
             >
-            {loading ? <CircularProgress size={20} color="inherit" /> : "Delete Project"}
+            {loading ? <CircularProgress size={20} color="inherit" /> : "Give Inventory Access"}
             </Button>
           </DialogFooter>
         </DialogContent>

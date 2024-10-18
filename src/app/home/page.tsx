@@ -9,89 +9,25 @@ import {
   useMaterialReactTable,
 } from "material-react-table";
 import { Button } from "@/components/ui/button";
-
-const hardCodedData=[
-      
-  {"itemDescription":"5NB - 2.5 MM THICK",
-    "grade":"210/240/310",
-    "weight":1.99
-  },
-  {"itemDescription":"25NB - 3.2 MM THICK",
-    "grade":"210/240/310",
-    "weight":2.41
-  },
-  {"itemDescription":"32NB - 2.6 MM THICK",
-    "grade":"210/240/310",
-    "weight":2.55
-  },
-  {"itemDescription":"32 NB- 3.2 MM THICK",
-    "grade":"210/240/310",
-    "weight":3.25
-  },
-  {"itemDescription":"40 NB- 3.2MM THICK",
-    "grade":"210/240/310",
-    "weight":3.56
-  },
-  {"itemDescription":"40 NB- 4.0 MM THICK",
-    "grade":"210/240/310",
-    "weight":4.37
-  },
-  {"itemDescription":"50 NB- 2.9 MM THICK",
-    "grade":"210/240/310",
-    "weight":4.11
-  },
-  {"itemDescription":"50 NB- 3.6 MM THICK",
-    "grade":"210/240/310",
-    "weight":5.04
-  },
-  {"itemDescription":"50 NB- 4.5 MM THICK",
-    "grade":"210/240/310",
-    "weight":6.9
-  },
-  {"itemDescription":"50 NB- 4.8 MM THICK",
-    "grade":"210/240/310",
-    "weight":6.57
-  },
+import baseURL from "@/utils/constants";
+import DeleteIcon from '@mui/icons-material/Delete';
 
 
-  ]
 
+import {
+  Box,
+  CircularProgress,
+
+  IconButton,
+  Tooltip,
+} from '@mui/material';
 const Page = () => {
   const [projectList, setProjectList] = useState([]);
   const [username, setUsername] = useState("");
-  const [tableData, setTableData] = useState(hardCodedData);
-
-  const loadData = async () => {
-    const user_name = localStorage.getItem("username") as string
-    try {
-      const response = await fetch(
-        `http://13.233.201.77/get_projects?username=${user_name}`,
-        {
-          method: "GET",
-        }
-      );
-      if (response.status == 200) {
-        const json_body = await response.json();
-        console.log(json_body)
-        setProjectList(json_body["project_list"])
-        
-        
-      }else{
-        alert("No such user exists")
-      }
-    } catch (error) {
-      alert("Unable to fetch project List")
-    }finally{
-      
-    }
-    
-  };
-
-  useEffect(() => {
-    const user_name = localStorage.getItem("username") as string;
-    setUsername(user_name);
-    loadData();
-  }, []);
+  const [tableData, setTableData] = useState([]);
+  const  [refreshTrigger, setRefreshTrigger] = useState(false);
+  const [inventoryAccess,setInventoryAccess]=useState(false)
+  const [loading, setLoading] = useState(false);
 
   const columns = [
     {
@@ -103,33 +39,169 @@ const Page = () => {
       header: "Grade",
     },
     {
-      accessorKey: "weight",
+      accessorKey: "thickness",
+      header: "THICKNESS",
+    },
+    
+    {
+      accessorKey: "weightPerMeter",
       header: "WEIGHT/METER (KG)",
     },
   ];
 
-  const handleCreateUser = (values) => {
-    setTableData([...tableData, values]);
+  const loadData = async () => {
+    const user_name = localStorage.getItem("username") as string
+    try {
+      const response = await fetch(
+        `${baseURL}/get_projects?username=${user_name}`,
+        {
+          method: "GET",
+        }
+      );
+      if (response.status == 200) {
+        const json_body = await response.json();
+        console.log(json_body)
+        setProjectList(json_body["project_list"])
+
+       
+        setInventoryAccess(json_body["invetory_access"])
+        
+        
+      }else{
+        alert("No such user exists")
+      }
+    } catch (error) {
+      alert("Unable to fetch project List")
+    }finally{
+      
+    }
+
+    try {
+      const response = await fetch(
+        `${baseURL}/get_inventory_list`,
+        {
+          method: "GET",
+        }
+      );
+      if (response.status == 200) {
+        const json_body = await response.json();
+        console.log(json_body)
+        setTableData(json_body["data"])
+        
+        
+      }else{
+        alert("Invalid Inventory Request")
+      }
+    } catch (error) {
+      alert("Unable to fetch Inventory List")
+    }finally{
+      
+    }
+    
   };
+
+  useEffect(() => {
+    const user_name = localStorage.getItem("username") as string;
+    setUsername(user_name);
+    loadData();
+  }, [refreshTrigger]);
+
+  
+
+  const handleCreateItem = async (values) =>  {
+    setLoading(true)
+    try {
+      const response = await fetch(
+        `${baseURL}/add_inventory_item`,
+        {
+          headers: { "content-type": "application/json" },
+          method: "POST",
+          body: JSON.stringify(values)
+        }
+      );
+      if (response.status == 200) {
+        const json_body = await response.json();
+        console.log(json_body)
+        
+        
+        
+      }else{
+        alert("Couldnt able to add the item")
+      }
+    } catch (error) {
+      alert("Unable to add the the item")
+    }finally{
+      setLoading(false)
+      setRefreshTrigger((prev)=>!prev)
+
+    }
+      };
+
+
+
+      const handleDeleteItem = async (values) =>  {
+        setLoading(true)
+        try {
+          const response = await fetch(
+            `${baseURL}/delete_inventory_item`,
+            {
+              headers: { "content-type": "application/json" },
+              method: "DELETE",
+              body: JSON.stringify(values)
+            }
+          );
+          if (response.status == 200) {
+            const json_body = await response.json();
+            console.log(json_body)
+            
+            
+            
+          }else{
+            alert("Couldnt able to add the item")
+          }
+        } catch (error) {
+          alert("Unable to add the the item")
+        }finally{
+          setLoading(false)
+          setRefreshTrigger((prev)=>!prev)
+        }
+          };
 
   const table = useMaterialReactTable({
     columns,
     data: tableData,
-    enableEditing: true,
     onCreatingRowSave: ({ values, table }) => {
-      handleCreateUser(values);
+      handleCreateItem(values);
       table.setCreatingRow(null);
     },
+    enableRowActions: true,
+    renderRowActions: ({ row, table }) => (
+      <Box sx={{ display: 'flex', flexWrap: 'nowrap' }}>
+        <Tooltip title="Delete">
+          <IconButton
+            color="error"
+            onClick={() => {
+              handleDeleteItem(row.original);
+              
+            }}
+          >
+            <DeleteIcon />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    ),
+   state:{
+    isLoading:loading,
+    showProgressBars: loading
+   },
     renderTopToolbarCustomActions: ({ table }) => (
       <Button
         onClick={() => {
           table.setCreatingRow(true);
         }}
       >
-        Add new Item
-      </Button>
+ {loading ? <CircularProgress size={20} color="inherit" /> : "AddItem"}      </Button>
     ),
-    // ... (other table properties remain unchanged)
   });
 
   return (
@@ -142,12 +214,13 @@ const Page = () => {
             <UploadFile project_list={projectList} />
             <ProjectSelection project_list={projectList} />
           </div>
-          <div className="flex flex-col gap-4">
+          {inventoryAccess?(<div className="flex flex-col gap-4">
             <h1 className="text-4xl font-bold">Inventory Management</h1>
             <div>
               <MaterialReactTable table={table} />
             </div>
-          </div>
+          </div>):(<></>)}
+          
         </div>
       </div>
     </div>

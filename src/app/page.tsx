@@ -9,6 +9,7 @@ import { useState } from "react";
 import Image from "next/image";
 import logo from "../../assets/epack_logo.webp";
 import CircularProgress from "@mui/material/CircularProgress";
+import baseURL from "@/utils/constants";
 
 const Home = () => {
   const router = useRouter();
@@ -36,7 +37,7 @@ const Home = () => {
     try {
       setLoading(true);
       console.log("Hadling auth");
-      const response = await fetch("http://13.233.201.77/login", {
+      const response = await fetch(`${baseURL}/login`, {
         headers: { "content-type": "application/json" },
 
         method: "POST",

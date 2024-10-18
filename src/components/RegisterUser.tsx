@@ -13,8 +13,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import baseURL from "@/utils/constants";
 import { CircleUser } from "lucide-react";
 import { ChangeEvent, useEffect, useState } from "react";
+import { CircularProgress } from "@mui/material";
 
 
 
@@ -24,10 +26,16 @@ export function RegisterUser({refresh_trigger}) {
   const [loading,setLoading]=useState(false)
 
   const handleRegister  = async (): Promise<void> => {
+    if (username.trim()==="" || password.trim()===""){
+
+      alert("Please enter valid username and password")
+      return
+    }
+      
     setLoading(true)
     try{
       const response = await fetch(
-        `http://13.233.201.77/register`,
+        `${baseURL}/register`,
         {
           headers:{'content-type': 'application/json'},
           method: "POST",
@@ -37,7 +45,6 @@ export function RegisterUser({refresh_trigger}) {
 
       if (response.status===201){
         alert("User Registerd Sucessfully")
-        refresh_trigger()
 
       }else{
         alert("User Already Registerd")
@@ -48,6 +55,10 @@ export function RegisterUser({refresh_trigger}) {
       alert("Not able to register any user")
     }finally{
       setLoading(false)
+      setUsername("")
+      setPassword("")
+      refresh_trigger()
+
     }
 
   }
@@ -110,7 +121,7 @@ export function RegisterUser({refresh_trigger}) {
             className="w-full"
             onClick={ handleRegister}
           >
-           Register
+            {loading ? <CircularProgress size={20} color="inherit" /> : "Register User"}
           </Button>
         </DialogFooter>
       </DialogContent>

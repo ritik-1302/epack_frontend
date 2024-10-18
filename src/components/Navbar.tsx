@@ -2,13 +2,9 @@
 import React from "react";
 import { Button } from "./ui/button";
 import {
-  BellIcon,
-  Settings2Icon,
   OctagonAlert,
-  ArrowDownToLine,
   DatabaseZap,
 } from "lucide-react";
-import { Avatar, AvatarFallback } from "./ui/avatar";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import logo from "../../assets/epack_logo.webp";
@@ -38,22 +34,8 @@ const Navbar = ({ is_parts_table, is_admin }) => {
               }}
             />
           </Button>
-          <Button variant="outline" size="icon">
-            <Settings2Icon className="h-[20px] w-[20px] text-gray-500" />
-          </Button>
-          <Button variant="ghost" size="icon">
-            <BellIcon className="h-[20px] w-[20px] text-gray-500" />
-          </Button>
-          {/* <Avatar>
-            <AvatarFallback>E</AvatarFallback>
-          </Avatar> */}
-          {is_parts_table ? (
-            <Button variant="ghost" size="icon">
-              <ArrowDownToLine className="h-[20px] w-[20px] text-gray-500" />
-            </Button>
-          ) : (
-            <div></div>
-          )}
+
+
 
           {is_admin ? (
             <Button

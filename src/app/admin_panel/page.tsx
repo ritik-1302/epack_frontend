@@ -4,11 +4,11 @@ import Navbar from "@/components/Navbar";
 import { ProjectAssign } from "@/components/ProjectAssign";
 import { RegisterUser } from "@/components/RegisterUser";
 import RevokeProjectAcess from "@/components/RevokeProjectAcess";
+import baseURL from "@/utils/constants";
+import InventoryAccess from "@/components/InventoryAccess";
+import RevokeInventoryAccess from "@/components/RevokeInventoryAccess";
 
 import { useEffect, useState } from "react";
-
-
-
 
 
 
@@ -25,7 +25,7 @@ export default function AdminPanel(){
         //get projects    
         try {
           const response = await fetch(
-            `http://13.233.201.77/get_projects?username=${user_name}`,
+            `${baseURL}/get_projects?username=${user_name}`,
             {
               method: "GET",
             }
@@ -48,7 +48,7 @@ export default function AdminPanel(){
         //get all users
         try {
             const response = await fetch(
-              `http://13.233.201.77/get_all_users`,
+              `${baseURL}/get_all_users`,
               {
                 method: "GET",
               }
@@ -71,7 +71,7 @@ export default function AdminPanel(){
 
           try {
             const response = await fetch(
-              `http://13.233.201.77/get_project_access_list`,
+              `${baseURL}/get_project_access_list`,
               {
                 method: "GET",
               }
@@ -118,9 +118,12 @@ export default function AdminPanel(){
           <h1 className="text-4xl font-bold">Admin Panel</h1>
           <div className="grid grid-cols-2 gap-4">
             <RegisterUser refresh_trigger={handleRerender}/>
-            <ProjectAssign project_list={allProjectList} user_list={allUsersList} refresh_trigger={handleRerender}/>
+            <ProjectAssign project_list={allProjectList} user_list={allUsersList} refresh_trigger={handleRerender} project_acess_list={projectAcessList}/>
             <RevokeProjectAcess project_acess_list={projectAcessList} refresh_trgger={handleRerender}  />
             <DeleteProject project_list={allProjectList} refresh_trigger={handleRerender}/>
+            <InventoryAccess user_list={allUsersList} refresh_trigger={handleRerender}/>
+            <RevokeInventoryAccess user_list={allUsersList} refresh_trigger={handleRerender}/>
+            
             
           </div>
           

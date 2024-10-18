@@ -24,19 +24,30 @@ import { Button } from "@/components/ui/button";
 import { FolderKanban } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import {  useState } from "react";
+import CircularProgress from "@mui/material/CircularProgress";
+import baseURL from "@/utils/constants";
 
-export function ProjectAssign({ project_list, user_list,refresh_trigger }) {
+export function ProjectAssign({ project_list, user_list,refresh_trigger ,project_acess_list}) {
  
   const [projects,setProjects]=useState<{ [key: string]: boolean }>({})
-  const [users,setUsers]=useState<{ [key: string]: boolean }>({})
+  const [username,setUsername]=useState<string|undefined>(undefined)
   const [projectOpen, setProjectOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
-
+  const [loading, setLoading] = useState(false);
 
   
+  
+  const filteredProjects = project_acess_list.filter(
+    (project) => project["username"] === username
+  );
+
+  const nonAccessProjects = project_list.filter(
+    (project)=> filteredProjects.length > 0 && filteredProjects[0].projects.includes(project)==false
+  );
+
 
   const handleAssign = async (): Promise<void> => {
-
+    
     let us_list:string[]=[]
     let pro_list:string[]=[]
 
@@ -50,11 +61,9 @@ export function ProjectAssign({ project_list, user_list,refresh_trigger }) {
        }
     })
 
-    Object.keys(users).forEach(key=>{
-      if (users[key]===true){
-       us_list.push(key)
-      }
-   })
+    if (username !== undefined) {
+       us_list.push(username);
+    }
 
 
    console.log("users",us_list)
@@ -70,10 +79,10 @@ export function ProjectAssign({ project_list, user_list,refresh_trigger }) {
 
     
 
-
+    setLoading(true);
     try{
       const response = await fetch(
-        `http://13.233.201.77/add_project`,
+        `${baseURL}/add_project`,
         {
           headers:{'content-type': 'application/json'},
           method: "POST",
@@ -92,7 +101,14 @@ export function ProjectAssign({ project_list, user_list,refresh_trigger }) {
       
       alert("Not able to assign the project try again later")
     }
+    finally{
+      setLoading(false)
+      refresh_trigger()
+      setProjects({})
+      setUsername(undefined)
 
+    }
+   
   }
 
   return (
@@ -123,6 +139,34 @@ export function ProjectAssign({ project_list, user_list,refresh_trigger }) {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
+          <Label htmlFor="username" className="text-sm">
+            Select Username
+          </Label>
+          <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">{username || "Select a username"}</Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 max-h-60 overflow-y-auto">
+                <DropdownMenuLabel>Username</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuRadioGroup value={username} onValueChange={(value)=>{
+                    setUsername(value)
+                    console.log(filteredProjects)
+
+                }}>
+                  {user_list.map((user) => (
+                    <DropdownMenuRadioItem
+                      key={user}
+                      value={user}
+                    >
+                      {user}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+
           <Label htmlFor="project" className="text-sm">
             Select Project
           </Label>
@@ -130,11 +174,34 @@ export function ProjectAssign({ project_list, user_list,refresh_trigger }) {
       <DropdownMenuTrigger asChild >
         <Button variant="outline" onClick={()=>setProjectOpen((prev)=>!prev)} ></Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56">
-        <DropdownMenuLabel>Projects</DropdownMenuLabel>
+      <DropdownMenuContent className="w-56 max-h-60 overflow-y-auto">
+        <DropdownMenuLabel>Projects Acess to this user</DropdownMenuLabel>
         <DropdownMenuSeparator />
+       
         
-        {project_list.map((project_name) => (
+          {filteredProjects.length > 0 &&
+            filteredProjects[0].projects.map((project) => (
+              <DropdownMenuLabel
+                key={project}
+                
+              >
+                {project}
+              </DropdownMenuLabel>
+            ))}
+
+       <DropdownMenuSeparator />
+
+
+
+
+
+       
+
+          
+
+        
+        
+        {nonAccessProjects.map((project_name) => (
             <DropdownMenuCheckboxItem
               key={project_name}
               checked={projects[project_name]}
@@ -144,7 +211,6 @@ export function ProjectAssign({ project_list, user_list,refresh_trigger }) {
                   [project_name]: !prevProjects[project_name],
                 }));
                 console.log(project_name);
-                // setOpen(e?true:false)
 
               }}
             >
@@ -155,38 +221,8 @@ export function ProjectAssign({ project_list, user_list,refresh_trigger }) {
        
       </DropdownMenuContent>
     </DropdownMenu >
-          <Label htmlFor="username" className="text-sm">
-            Select Username
-          </Label>
-        <DropdownMenu open={userOpen}>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" onClick={()=>setUserOpen((prev)=>!prev)} ></Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56">
-        <DropdownMenuLabel>Projects</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        
-        {user_list.map((user) => (
-            <DropdownMenuCheckboxItem
-
-              key={user}
-              checked={users[user]}
-              onCheckedChange={() => {
-                setUsers((prevUsers) => ({
-                  ...prevUsers,
-                  [user]: !prevUsers[user],
-                }));
-                console.log(user);
-              }}
-            >
-              {user}
-            </DropdownMenuCheckboxItem>
-          ))}
-        
-       
-      </DropdownMenuContent>
-    </DropdownMenu>
-        </div>
+          
+   </div>
 
         <DialogFooter>
           <Button
@@ -194,7 +230,7 @@ export function ProjectAssign({ project_list, user_list,refresh_trigger }) {
             className="w-full"
             onClick={ handleAssign}
           >
-            Assign
+             {loading ? <CircularProgress size={20} color="inherit" /> : "Assign Projects"}
           </Button>
         </DialogFooter>
       </DialogContent>

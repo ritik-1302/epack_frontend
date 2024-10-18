@@ -23,6 +23,8 @@ import {
   import { BookX } from "lucide-react";
   import { Label } from "@/components/ui/label";
   import { useState } from "react";
+import baseURL from "@/utils/constants";
+import { CircularProgress } from "@mui/material";
   
   // Define the types for your props
   interface ProjectAccess {
@@ -43,6 +45,7 @@ import {
     const [userName, setUsername] = useState<string>("");
     const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
     const [projectOpen,setProjectOpen]=useState(false)
+    const [loading,setLoading]=useState(false)
 
   
     // Filter projects based on the selected username
@@ -62,9 +65,10 @@ import {
 
 
     const handleRevokeAcess = async (): Promise<void> => {
+      setLoading(true)
         try{
             const response = await fetch(
-              `http://13.233.201.77/remove_project_access`,
+              `${baseURL}/remove_project_access`,
               {
                 headers:{'content-type': 'application/json'},
                 method: "DELETE",
@@ -74,7 +78,6 @@ import {
       
             if (response.status===200){
               alert("Revoked acess suceesfully")
-              refresh_trgger()
       
             }else{
               alert("Some error occuerd")
@@ -87,6 +90,9 @@ import {
           finally{
             setSelectedProjects([])
             setUsername("")
+            setLoading(false)
+            refresh_trgger()
+
 
           }
 
@@ -177,7 +183,7 @@ import {
               className="w-full"
               onClick={handleRevokeAcess}
             >
-              Revoke Access
+               {loading ? <CircularProgress size={20} color="inherit" /> : "Revoke Acess"}
             </Button>
           </DialogFooter>
         </DialogContent>
