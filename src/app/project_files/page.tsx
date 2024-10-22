@@ -59,6 +59,7 @@ const ProjectFiles = () => {
                   className="w-full border border-gray-300 p-[16px] flex items-center justify-between mb-4 cursor-pointer"
                   onClick={() => {
                     localStorage.setItem("filename", file["hashed_file_name"]);
+                    localStorage.setItem("table_metadata",JSON.stringify(file["table_metadata"]))
                     router.push("/parts_table");
                   }}
                 >

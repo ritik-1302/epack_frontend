@@ -148,6 +148,7 @@ export function UploadFile({ project_list }) {
         const data = await response.json();
         console.log("Data:", data);
         localStorage.setItem("filename", data["file_name"]);
+        localStorage.removeItem("table_metadata")
 
         setLoading(false);
         router.push("/parts_table");

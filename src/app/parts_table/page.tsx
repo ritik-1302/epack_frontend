@@ -42,6 +42,7 @@ export default function PartsTable() {
   }>({ width: null, height: null });
   const [isPrinting, setIsPrinting] = useState(false);
   const [isDarkMode,setIsDarkMode]=useState(false);
+  const [positions,setPositions]=useState<{[key:string]:{x:number,y:number,scale:number}}>({})
 
   const floatingButtonStyles: CSSProperties = {
     position: "fixed",
@@ -67,6 +68,33 @@ export default function PartsTable() {
     
     // Deeper shadow for contrast
   };
+
+  const handleSaveLayout=async():Promise<void>=>{
+    const filename=localStorage.getItem("filename");
+    try{
+      const response=await fetch(`${baseURL}/save_layout?filename=${filename}`,{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          positions
+        })
+      })
+      if (response.status===200){
+        alert("Layout saved successfully");
+      }else{
+        alert("Error saving layout");
+      }
+
+    }catch (error) {
+    alert("Unable to update Layout")
+      
+    }
+    
+
+  };
+
 
 
   const handleExcelDownload = async (): Promise<void> => {
@@ -147,6 +175,7 @@ export default function PartsTable() {
 
   const loadData = async (): Promise<void> => {
     const filename = localStorage.getItem("filename");
+    const table_metadata=localStorage.getItem("table_metadata")
 
     try {
       console.log("fetching file from S3");
@@ -163,7 +192,25 @@ export default function PartsTable() {
         const phases: string[] = [];
         Object.entries(json_body).forEach(([_, v]) => {
           Object.entries(v as Record<string, object>).forEach(([_, value]) => {
+            if(table_metadata===null){
+              setPositions((prevPos) => ({
+                ...prevPos,
+                [_]: {
+                  ...prevPos[_], // Make sure to spread the previous object to avoid losing other properties.
+                  x: 100,
+                  y: 100,
+                  scale: 0.5,
+                },
+              }));
+
+            }else{
+              setPositions(JSON.parse(table_metadata))
+
+            }
+            
+
             Object.entries(value["phase"]).forEach(([phase]) => {
+
               if (!phases.includes(phase)) {
                 phases.push(phase);
               }
@@ -171,6 +218,7 @@ export default function PartsTable() {
           });
         });
         setPhaseList(phases); 
+        
 
         
       } else {
@@ -183,12 +231,20 @@ export default function PartsTable() {
   };
   const increaseTableSize = () => {
     if (hoveredKey) {
-      setTableSizes((prevSizes) => ({
+      // setTableSizes((prevSizes) => ({
+      //   ...prevSizes,
+      //   [hoveredKey]: (prevSizes[hoveredKey] || 0.5) + 0.05,
+      // }));
+      setPositions((prevSizes)=>({
         ...prevSizes,
-        [hoveredKey]: (prevSizes[hoveredKey] || 0.5) + 0.05,
-      }));
+        [hoveredKey]:{
+          ...prevSizes[hoveredKey],
+          scale:(prevSizes[hoveredKey].scale)+0.05
+        }
 
-      if (tableSizes[hoveredKey] > 1) {
+      }))
+
+      if (positions[hoveredKey].scale > 1) {
         alert("Scaling too High");
       }
     }
@@ -207,12 +263,16 @@ export default function PartsTable() {
   };
   const decreaseTableSize = () => {
     if (hoveredKey) {
-      setTableSizes((prevSizes) => ({
+      setPositions((prevSizes)=>({
         ...prevSizes,
-        [hoveredKey]: (prevSizes[hoveredKey] || 0.5) - 0.05,
-      }));
+        [hoveredKey]:{
+          ...prevSizes[hoveredKey],
+          scale:(prevSizes[hoveredKey].scale)-0.05
+        }
 
-      if (tableSizes[hoveredKey] < 0.2) {
+      }))
+
+      if (positions[hoveredKey].scale < 0.2) {
         alert("Scaling too Low");
       }
     }
@@ -231,6 +291,7 @@ export default function PartsTable() {
             ...prevSizes,
             [key]: 0.5,
           }));
+         
         });
       });
     }
@@ -263,9 +324,10 @@ export default function PartsTable() {
                         key={`${key}`}
                         block_name={key}
                         parts_object={value}
-                        tablesize={tableSizes[key]}
                         phase_qty={value["phase"][phase]}
                         dark_mode={isDarkMode}
+                        setPos={setPositions}
+                        pos={positions}
                       />
                     </div>
                   )
@@ -275,6 +337,9 @@ export default function PartsTable() {
           </div>
           {isPrinting ? null : (
             <div style={floatingButtonStyles}>
+               <button style={moveButtonStyles} onClick={()=>handleSaveLayout()}>
+                Save Layout
+              </button>
                <button style={moveButtonStyles} onClick={()=>setIsDarkMode((prev)=>!prev)}>
                 Toggle Dark/Light Mode
               </button>

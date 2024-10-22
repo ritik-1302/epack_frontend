@@ -5,18 +5,25 @@ import {
   useMaterialReactTable,
 } from "material-react-table";
 import { Rnd } from "react-rnd";
+import { Button } from "@/components/ui/button";
 
 export function SvgwithTable({
   block_name,
   parts_object,
-  tablesize,
   phase_qty,
-  dark_mode
+  dark_mode,
+   setPos,
+   pos
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
-  const data=parts_object["parts"]
-  
+  const [data,setData]=useState(parts_object["parts"])
+ 
+
+  const handleAddPart = (values) => {
+    setData([...data, values]);
+  };
+
   const columns = 
     [
       {
@@ -62,12 +69,30 @@ export function SvgwithTable({
       columns,
       data: data,
       enablePagination: false,
+      onCreatingRowSave: ({ values, table }) => {
+        handleAddPart(values);
+        table.setCreatingRow(null);
+      },
       renderTopToolbarCustomActions: ({ table }) => (
         <div>
-          {block_name}
+          <Button
+        onClick={() => {
+          table.setCreatingRow(true);
+        }}
+      >
+       Add Item
+      </Button>
         </div>
+        
       
       ),
+      renderBottomToolbarCustomActions:({table})=>(
+        <div>
+        {block_name}
+        </div>
+      ) ,
+        
+      
       
       muiTableBodyRowProps: { hover: false },
       muiTableProps: {
@@ -151,21 +176,36 @@ export function SvgwithTable({
     >
       <canvas ref={canvasRef} />
       <Rnd
+     
+    
+      onDragStop={(e,d)=>{
+        setPos((prevPos)=>({
+          ...prevPos,
+          [block_name]:{
+            ...prevPos[block_name],
+            x:d.x,
+            y:d.y
+          }
+
+
+        }))
+        console.log(d.x,d.y)}
+      }
         style={{
           position: "absolute",
           top: 0,
           left: 0,
         }}
         default={{
-          x: 0,
-          y: 0,
+          x: pos[block_name].x,
+          y: pos[block_name].y,
           width: 320,
           height: 200,
         }}
       >
         <div
           style={{
-            transform: `scale(${tablesize})`,
+            transform: `scale(${pos[block_name].scale})`,
             transformOrigin: "top left",
             width: "fit-content",
             filter: dark_mode ? "invert(1) hue-rotate(180deg)" : "none",
@@ -179,3 +219,5 @@ export function SvgwithTable({
     </div>
   );
 }
+
+
