@@ -31,6 +31,14 @@ export function SvgwithTable({
         header: "Part Name",
       },
       {
+        accessorKey: "Length (mm)",
+        header: "Length (mm)",
+      },
+      {
+        accessorKey: "Width (mm)",
+        header: "Width (mm)",
+      },
+      {
         accessorKey: "Thickness (mm)",
         header: "Thickness (mm)",
       },
@@ -44,12 +52,8 @@ export function SvgwithTable({
         accessorFn: (row)=>phase_qty*row["Quantity"]
       },
       {
-        accessorKey: "Length (mm)",
-        header: "Length (mm)",
-      },
-      {
-        accessorKey: "Width (mm)",
-        header: "Width (mm)",
+        accessorKey: "Weight (kg)",
+        header: "Weight (kg)",
       },
       {
         accessorKey: "Area (m2)",
@@ -59,16 +63,19 @@ export function SvgwithTable({
         accessorKey: "Volume (m3)",
         header: "Volume (m3)",
       },
-      {
-        accessorKey: "Weight (kg)",
-        header: "Weight (kg)",
-      },
     ]
 
     const table = useMaterialReactTable({
       columns,
       data: data,
       enablePagination: false,
+      enableEditing: true,
+      editDisplayMode: 'cell', //default
+      onEditingRowSave: ({ table, values }) => {
+        //validate data
+        //save data to api
+        table.setEditingRow(null); //exit editing mode
+      },
       onCreatingRowSave: ({ values, table }) => {
         handleAddPart(values);
         table.setCreatingRow(null);
@@ -91,7 +98,7 @@ export function SvgwithTable({
         {block_name}
         </div>
       ) ,
-        
+      
       
       
       muiTableBodyRowProps: { hover: false },
@@ -141,9 +148,9 @@ export function SvgwithTable({
       console.log(svgWidth, svgHeight);
 
       // Set canvas size
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      setCanvasSize({ width: canvas.width, height: window.innerHeight - 50 });
+      canvas.width = 1754;
+      canvas.height = 1240;
+      setCanvasSize({ width: canvas.width, height: window.innerHeight  });
 
       // Create a Blob from the SVG string
       const svgBlob = new Blob([parts_object["image_url"]], {
