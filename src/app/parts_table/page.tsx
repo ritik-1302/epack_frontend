@@ -309,8 +309,8 @@ export default function PartsTable() {
       {data["data"] ? (
         <>
           <div style={{
-      overflowX:"hidden",
-      overflowY:"hidden"
+      // overflowX:"hidden",
+      // overflowY:"hidden"
     }} 
     ref={componentRef}>
             <div
