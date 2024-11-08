@@ -148,11 +148,11 @@ export function SvgwithTable({
       console.log(svgWidth, svgHeight);
 
       // Set canvas size
-      // canvas.width = 1754;
-      // canvas.height = 1240;
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      setCanvasSize({ width: canvas.width, height: window.innerHeight -50 });
+      canvas.width = 1754;
+      canvas.height = 1240;
+      // canvas.width = window.innerWidth;
+      // canvas.height = window.innerHeight;
+      setCanvasSize({ width: canvas.width, height: canvas.height-50 });
 
       // Create a Blob from the SVG string
       const svgBlob = new Blob([parts_object["image_url"]], {
