@@ -27,6 +27,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import baseURL from "@/utils/constants";
+import { Scale } from "lucide-react";
 export default function PartsTable() {
   const [data, setData] = useState({});
   const [username, setUsername] = useState("");
@@ -43,6 +44,7 @@ export default function PartsTable() {
   const [isPrinting, setIsPrinting] = useState(false);
   const [isDarkMode,setIsDarkMode]=useState(false);
   const [positions,setPositions]=useState<{[key:string]:{x:number,y:number,scale:number}}>({})
+  const [zoom,setZoom]=useState(1);
 
   const floatingButtonStyles: CSSProperties = {
     position: "fixed",
@@ -65,6 +67,7 @@ export default function PartsTable() {
     transition: "background-color 0.3s, transform 0.2s", // Smooth transition for hover effects
     boxShadow: "0 4px 10px rgba(0, 0, 0, 0.5)",
     filter: isDarkMode ? "invert(1) hue-rotate(180deg)" : "none",
+
     
     // Deeper shadow for contrast
   };
@@ -281,6 +284,20 @@ export default function PartsTable() {
     setTriggerRerender((prev) => !prev); // Toggle the state to cause rerender
   };
 
+  const increaseZoom=()=>{
+    setZoom((prev)=>prev+0.1)
+
+  }
+
+  const decreaseZoom=()=>{
+    setZoom((prev)=>prev-0.1)
+
+  }
+  const resetZoom=()=>{
+    setZoom(1)
+
+  }
+
   useEffect(() => {
     if (Object.keys(data).length > 0) {
       Object.entries(data).forEach(([k, v]) => {
@@ -308,13 +325,16 @@ export default function PartsTable() {
       <Navbar is_parts_table={true} is_admin={username === "epack"} />
       {data["data"] ? (
         <>
-          <div style={{
+     <div style={{
+      zoom:zoom
+      
       // overflowX:"hidden",
       // overflowY:"hidden"
     }} 
     ref={componentRef}>
             <div
-              style={{ display: "flex", gap: "10px", flexDirection: "column" }}
+
+              style={{ display: "flex", gap: "10px", flexDirection: "column"}}
             >
               {Object.entries(data).map(([k, v]) =>
                 Object.entries(v as Record<string, object>).map(
@@ -337,6 +357,16 @@ export default function PartsTable() {
           </div>
           {isPrinting ? null : (
             <div style={floatingButtonStyles}>
+
+            <button style={moveButtonStyles} onClick={increaseZoom} >
+               🔍+
+              </button>
+              <button style={moveButtonStyles}  onClick={decreaseZoom}>
+              🔍-
+              </button>
+              <button style={moveButtonStyles}  onClick={resetZoom}>
+              🔍Reset Zoom
+              </button>
                <button style={moveButtonStyles} onClick={()=>handleSaveLayout()}>
                 Save Layout
               </button>
