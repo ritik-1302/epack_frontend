@@ -45,6 +45,7 @@ export default function PartsTable() {
   const [isDarkMode,setIsDarkMode]=useState(false);
   const [positions,setPositions]=useState<{[key:string]:{x:number,y:number,scale:number}}>({})
   const [zoom,setZoom]=useState(1);
+  
 
   const floatingButtonStyles: CSSProperties = {
     position: "fixed",
@@ -54,6 +55,8 @@ export default function PartsTable() {
     display: "flex",
     flexDirection: "column",
   };
+
+  let  prevZoom=1
 
   const moveButtonStyles: CSSProperties = {
     marginBottom: "10px",
@@ -156,6 +159,7 @@ export default function PartsTable() {
   };
 
   const handlePrint = useReactToPrint({
+    
     pageStyle: `@media print {
       @page {
         size: ${dimensions.width}  ${dimensions.height};
@@ -165,7 +169,12 @@ export default function PartsTable() {
     documentTitle: "PartsTable",
     onBeforeGetContent: () => {
       return new Promise((resolve) => {
-        setZoom(1);
+
+        setZoom((prev)=>{
+          prevZoom=prev
+          return 1
+        });
+        
         setIsPrinting(true);
 
         setTimeout(resolve, 1000);
@@ -173,6 +182,7 @@ export default function PartsTable() {
     },
 
     onAfterPrint: () => {
+      setZoom(prevZoom);
       setIsPrinting(false);
     },
   });
