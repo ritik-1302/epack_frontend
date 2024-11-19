@@ -165,6 +165,7 @@ export default function PartsTable() {
     documentTitle: "PartsTable",
     onBeforeGetContent: () => {
       return new Promise((resolve) => {
+        setZoom(1);
         setIsPrinting(true);
 
         setTimeout(resolve, 1000);

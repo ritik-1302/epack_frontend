@@ -98,8 +98,8 @@ export function UploadFile({ project_list }) {
     formData.append("density", density);
     // formData.append("height", window.innerHeight.toString());
     // formData.append("width", window.innerWidth.toString());
-    formData.append("height", (1240).toString());
-    formData.append("width", (1754).toString());
+    formData.append("height", (2480).toString());
+    formData.append("width", (3508).toString());
     formData.append("filename", uploadedFile.name);
     formData.append("username", localStorage.getItem("username")!);
     if (newProjectName === "") {

@@ -148,8 +148,8 @@ export function SvgwithTable({
       console.log(svgWidth, svgHeight);
 
       // Set canvas size
-      canvas.width = 1754;
-      canvas.height = 1240;
+      canvas.width = 3508;
+      canvas.height = 2480;
       // canvas.width = window.innerWidth;
       // canvas.height = window.innerHeight;
       setCanvasSize({ width: canvas.width, height: canvas.height-50 });
