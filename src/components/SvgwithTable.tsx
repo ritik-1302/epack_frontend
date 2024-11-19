@@ -110,13 +110,19 @@ export function SvgwithTable({
       },
       muiTableHeadCellProps: {
         sx: {
-          border: "1px solid rgba(81, 81, 81, .5)",
-          fontStyle: "italic",
-          fontWeight: "normal",
+          border: "2px solid rgba(81, 81, 81, .5)",
+          fontStyle: "normal",
+          fontWeight: "bold",
+          fontSize: "22px",
         },
       },
       muiTableBodyCellProps: {
-        sx: { border: "1px solid rgba(81, 81, 81, .5)" },
+        sx: { border: "2px solid rgba(81, 81, 81, .5)",
+          fontStyle: "normal",
+          fontWeight: "bold",
+          fontSize: "22px",
+         },
+       
       },
       enableColumnOrdering: true,
   

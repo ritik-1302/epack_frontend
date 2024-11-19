@@ -203,7 +203,7 @@ export default function PartsTable() {
                   ...prevPos[_], // Make sure to spread the previous object to avoid losing other properties.
                   x: 100,
                   y: 100,
-                  scale: 0.5,
+                  scale: 1,
                 },
               }));
 
@@ -235,10 +235,7 @@ export default function PartsTable() {
   };
   const increaseTableSize = () => {
     if (hoveredKey) {
-      // setTableSizes((prevSizes) => ({
-      //   ...prevSizes,
-      //   [hoveredKey]: (prevSizes[hoveredKey] || 0.5) + 0.05,
-      // }));
+     
       setPositions((prevSizes)=>({
         ...prevSizes,
         [hoveredKey]:{
@@ -248,7 +245,7 @@ export default function PartsTable() {
 
       }))
 
-      if (positions[hoveredKey].scale > 1) {
+      if (positions[hoveredKey].scale > 1.5) {
         alert("Scaling too High");
       }
     }
@@ -276,7 +273,7 @@ export default function PartsTable() {
 
       }))
 
-      if (positions[hoveredKey].scale < 0.2) {
+      if (positions[hoveredKey].scale < 0.5) {
         alert("Scaling too Low");
       }
     }
@@ -307,7 +304,7 @@ export default function PartsTable() {
           setDimensions({ height: dimensions.height, width: dimensions.width });
           setTableSizes((prevSizes) => ({
             ...prevSizes,
-            [key]: 0.5,
+            [key]: 1,
           }));
          
         });
