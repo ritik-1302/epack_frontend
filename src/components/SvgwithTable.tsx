@@ -71,6 +71,10 @@ export function SvgwithTable({
       enablePagination: false,
       enableEditing: true,
       editDisplayMode: 'cell', //default
+      state:{
+        density:'compact'
+
+      },
       onEditingRowSave: ({ table, values }) => {
         //validate data
         //save data to api
@@ -227,7 +231,7 @@ export function SvgwithTable({
            
           }}
         >
-          <MaterialReactTable table={table} key={`${block_name}`}></MaterialReactTable>
+          <MaterialReactTable   table={table} key={`${block_name}`}></MaterialReactTable>
           
         </div>
       </Rnd>
