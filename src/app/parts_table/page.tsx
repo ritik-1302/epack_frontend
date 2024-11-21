@@ -255,6 +255,9 @@ export default function PartsTable() {
 
       }))
 
+      console.log(data["data"][hoveredKey]["parts"].length);
+       
+
       if (positions[hoveredKey].scale > 1.5) {
         alert("Scaling too High");
       }
@@ -283,7 +286,7 @@ export default function PartsTable() {
 
       }))
 
-      if (positions[hoveredKey].scale < 0.5) {
+      if (positions[hoveredKey].scale < 0.7) {
         alert("Scaling too Low");
       }
     }
