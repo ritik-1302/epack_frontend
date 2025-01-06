@@ -7,7 +7,7 @@ import {
 import { Rnd } from "react-rnd";
 import { Button } from "@/components/ui/button";
 
-export function SvgwithTable({
+export default function SvgwithTable({
   block_name,
   parts_object,
   phase_qty,

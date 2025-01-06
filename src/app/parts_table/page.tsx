@@ -1,10 +1,18 @@
-
 "use client";
-import React, { useEffect, useState, CSSProperties, useRef } from "react";
+import React, {
+  useEffect,
+  useState,
+  CSSProperties,
+  useRef,
+  lazy,
+  Suspense,
+} from "react";
 import Navbar from "../../components/Navbar";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useReactToPrint } from "react-to-print";
-import { SvgwithTable } from "@/components/SvgwithTable";
+// import { SvgwithTable } from "@/components/SvgwithTable";
+const SvgwithTable = React.lazy(() => import("@/components/SvgwithTable"));
+
 import {
   Dialog,
   DialogContent,
@@ -42,10 +50,22 @@ export default function PartsTable() {
     height: string | null;
   }>({ width: null, height: null });
   const [isPrinting, setIsPrinting] = useState(false);
-  const [isDarkMode,setIsDarkMode]=useState(false);
-  const [positions,setPositions]=useState<{[key:string]:{x:number,y:number,scale:number}}>({})
-  const [zoom,setZoom]=useState(1);
-  
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [positions, setPositions] = useState<{
+    [key: string]: { x: number; y: number; scale: number };
+  }>({});
+  const [zoom, setZoom] = useState(1);
+
+  //New code Scrolling logic
+  const [loadedTables, setLoadedTables] = useState<number>(3); // Load 3 initially
+  // const componentRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+
+  const loadMoreTables = () => {
+    console.log("Adding more entriews")
+    setLoadedTables((prev) => prev + 3); // Load 3 more tables
+  };
 
   const floatingButtonStyles: CSSProperties = {
     position: "fixed",
@@ -56,7 +76,7 @@ export default function PartsTable() {
     flexDirection: "column",
   };
 
-  let  prevZoom=1
+  let prevZoom = 1;
 
   const moveButtonStyles: CSSProperties = {
     marginBottom: "10px",
@@ -71,37 +91,33 @@ export default function PartsTable() {
     boxShadow: "0 4px 10px rgba(0, 0, 0, 0.5)",
     filter: isDarkMode ? "invert(1) hue-rotate(180deg)" : "none",
 
-    
     // Deeper shadow for contrast
   };
 
-  const handleSaveLayout=async():Promise<void>=>{
-    const filename=localStorage.getItem("filename");
-    try{
-      const response=await fetch(`${baseURL}/save_layout?filename=${filename}`,{
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-          positions
-        })
-      })
-      if (response.status===200){
+  const handleSaveLayout = async (): Promise<void> => {
+    const filename = localStorage.getItem("filename");
+    try {
+      const response = await fetch(
+        `${baseURL}/save_layout?filename=${filename}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            positions,
+          }),
+        }
+      );
+      if (response.status === 200) {
         alert("Layout saved successfully");
-      }else{
+      } else {
         alert("Error saving layout");
       }
-
-    }catch (error) {
-    alert("Unable to update Layout")
-      
+    } catch (error) {
+      alert("Unable to update Layout");
     }
-    
-
   };
-
-
 
   const handleExcelDownload = async (): Promise<void> => {
     const filename = localStorage.getItem("filename");
@@ -159,7 +175,6 @@ export default function PartsTable() {
   };
 
   const handlePrint = useReactToPrint({
-    
     pageStyle: `@media print {
       @page {
         size: ${dimensions.width}  ${dimensions.height};
@@ -169,12 +184,11 @@ export default function PartsTable() {
     documentTitle: "PartsTable",
     onBeforeGetContent: () => {
       return new Promise((resolve) => {
-
-        setZoom((prev)=>{
-          prevZoom=prev
-          return 1
+        setZoom((prev) => {
+          prevZoom = prev;
+          return 1;
         });
-        
+
         setIsPrinting(true);
 
         setTimeout(resolve, 1000);
@@ -189,7 +203,7 @@ export default function PartsTable() {
 
   const loadData = async (): Promise<void> => {
     const filename = localStorage.getItem("filename");
-    const table_metadata=localStorage.getItem("table_metadata")
+    const table_metadata = localStorage.getItem("table_metadata");
 
     try {
       console.log("fetching file from S3");
@@ -206,7 +220,7 @@ export default function PartsTable() {
         const phases: string[] = [];
         Object.entries(json_body).forEach(([_, v]) => {
           Object.entries(v as Record<string, object>).forEach(([_, value]) => {
-            if(table_metadata===null){
+            if (table_metadata === null) {
               setPositions((prevPos) => ({
                 ...prevPos,
                 [_]: {
@@ -216,25 +230,18 @@ export default function PartsTable() {
                   scale: 1,
                 },
               }));
-
-            }else{
-              setPositions(JSON.parse(table_metadata))
-
+            } else {
+              setPositions(JSON.parse(table_metadata));
             }
-            
 
             Object.entries(value["phase"]).forEach(([phase]) => {
-
               if (!phases.includes(phase)) {
                 phases.push(phase);
               }
             });
           });
         });
-        setPhaseList(phases); 
-        
-
-        
+        setPhaseList(phases);
       } else {
         alert("No such file exist in the Cloud");
       }
@@ -245,18 +252,15 @@ export default function PartsTable() {
   };
   const increaseTableSize = () => {
     if (hoveredKey) {
-     
-      setPositions((prevSizes)=>({
+      setPositions((prevSizes) => ({
         ...prevSizes,
-        [hoveredKey]:{
+        [hoveredKey]: {
           ...prevSizes[hoveredKey],
-          scale:(prevSizes[hoveredKey].scale)+0.05
-        }
-
-      }))
+          scale: prevSizes[hoveredKey].scale + 0.05,
+        },
+      }));
 
       console.log(data["data"][hoveredKey]["parts"].length);
-       
 
       if (positions[hoveredKey].scale > 1.5) {
         alert("Scaling too High");
@@ -277,14 +281,13 @@ export default function PartsTable() {
   };
   const decreaseTableSize = () => {
     if (hoveredKey) {
-      setPositions((prevSizes)=>({
+      setPositions((prevSizes) => ({
         ...prevSizes,
-        [hoveredKey]:{
+        [hoveredKey]: {
           ...prevSizes[hoveredKey],
-          scale:(prevSizes[hoveredKey].scale)-0.05
-        }
-
-      }))
+          scale: prevSizes[hoveredKey].scale - 0.05,
+        },
+      }));
 
       if (positions[hoveredKey].scale < 0.7) {
         alert("Scaling too Low");
@@ -295,19 +298,16 @@ export default function PartsTable() {
     setTriggerRerender((prev) => !prev); // Toggle the state to cause rerender
   };
 
-  const increaseZoom=()=>{
-    setZoom((prev)=>prev+0.1)
+  const increaseZoom = () => {
+    setZoom((prev) => prev + 0.1);
+  };
 
-  }
-
-  const decreaseZoom=()=>{
-    setZoom((prev)=>prev-0.1)
-
-  }
-  const resetZoom=()=>{
-    setZoom(1)
-
-  }
+  const decreaseZoom = () => {
+    setZoom((prev) => prev - 0.1);
+  };
+  const resetZoom = () => {
+    setZoom(1);
+  };
 
   useEffect(() => {
     if (Object.keys(data).length > 0) {
@@ -319,7 +319,6 @@ export default function PartsTable() {
             ...prevSizes,
             [key]: 1,
           }));
-         
         });
       });
     }
@@ -331,57 +330,95 @@ export default function PartsTable() {
     loadData();
   }, [trigger]);
 
+  
+
+ 
+
+
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollEnd = (window.innerHeight + window.scrollY) >= document.body.offsetHeight - 50;
+      
+      if (scrollEnd && !isLoading) {
+        setIsLoading(true); // Set loading to true to prevent further calls
+        loadMoreTables();
+
+        // Optionally, reset the loading state after the tables are loaded
+        setTimeout(() => {
+          setIsLoading(false); // Reset flag after loading
+        }, 3000); // Adjust the time if needed
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    // Cleanup the event listener on unmount
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isLoading]);
+
   return (
-    <div >
+    <div>
       <Navbar is_parts_table={true} is_admin={username === "epack"} />
       {data["data"] ? (
         <>
-     <div style={{
-      zoom:zoom
-      
-      // overflowX:"hidden",
-      // overflowY:"hidden"
-    }} 
-    ref={componentRef}>
-            <div
+          <div
+            style={{
+              zoom: zoom,
 
-              style={{ display: "flex", gap: "10px", flexDirection: "column"}}
+              // overflowX:"hidden",
+              // overflowY:"hidden"
+            }}
+            
+          >
+            <div
+              style={{ display: "flex", gap: "10px", flexDirection: "column" }}
             >
               {Object.entries(data).map(([k, v]) =>
-                Object.entries(v as Record<string, object>).map(
-                  ([key, value]) => (
-                    <div key={`${key}-${phase}`} onMouseEnter={() => setHoveredKey(key)}>
-                      <SvgwithTable
-                        key={`${key}`}
-                        block_name={key}
-                        parts_object={value}
-                        phase_qty={value["phase"][phase]}
-                        dark_mode={isDarkMode}
-                        setPos={setPositions}
-                        pos={positions}
-                      />
+                Object.entries(v as Record<string, object>)
+                  .slice(0, loadedTables)
+                  .map(([key, value]) => (
+                    <div
+                      key={`${key}-${phase}`}
+                      onMouseEnter={() => setHoveredKey(key)}
+                    >
+                      <Suspense fallback={<CircularProgress />}>
+                        <SvgwithTable
+                          key={`${key}`}
+                          block_name={key}
+                          parts_object={value}
+                          phase_qty={value["phase"][phase]}
+                          dark_mode={isDarkMode}
+                          setPos={setPositions}
+                          pos={positions}
+                        />
+                      </Suspense>
                     </div>
-                  )
-                )
+                  ))
               )}
             </div>
           </div>
           {isPrinting ? null : (
             <div style={floatingButtonStyles}>
-
-            <button style={moveButtonStyles} onClick={increaseZoom} >
-               🔍+
+              <button style={moveButtonStyles} onClick={increaseZoom}>
+                🔍+
               </button>
-              <button style={moveButtonStyles}  onClick={decreaseZoom}>
-              🔍-
+              <button style={moveButtonStyles} onClick={decreaseZoom}>
+                🔍-
               </button>
-              <button style={moveButtonStyles}  onClick={resetZoom}>
-              🔍Reset Zoom
+              <button style={moveButtonStyles} onClick={resetZoom}>
+                🔍Reset Zoom
               </button>
-               <button style={moveButtonStyles} onClick={()=>handleSaveLayout()}>
+              <button
+                style={moveButtonStyles}
+                onClick={() => handleSaveLayout()}
+              >
                 Save Layout
               </button>
-               <button style={moveButtonStyles} onClick={()=>setIsDarkMode((prev)=>!prev)}>
+              <button
+                style={moveButtonStyles}
+                onClick={() => setIsDarkMode((prev) => !prev)}
+              >
                 Toggle Dark/Light Mode
               </button>
               <button style={moveButtonStyles} onClick={increaseTableSize}>
@@ -423,11 +460,7 @@ export default function PartsTable() {
                           onValueChange={setPhase}
                         >
                           {phaseList.map((phase) => (
-                            <DropdownMenuRadioItem
-                              key={phase}
-                              value={phase}
-                           
-                            >
+                            <DropdownMenuRadioItem key={phase} value={phase}>
                               {phase}
                             </DropdownMenuRadioItem>
                           ))}
