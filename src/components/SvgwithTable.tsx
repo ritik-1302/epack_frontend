@@ -70,7 +70,7 @@ export default function SvgwithTable({
       data: data,
       enablePagination: false,
       enableEditing: true,
-      editDisplayMode: 'cell', //default
+      editDisplayMode: 'cell', 
       state:{
         density:'compact'
 
