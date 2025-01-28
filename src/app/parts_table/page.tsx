@@ -61,9 +61,8 @@ export default function PartsTable() {
   // const componentRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-
   const loadMoreTables = () => {
-    console.log("Adding more entriews")
+    console.log("Adding more entriews");
     setLoadedTables((prev) => prev + 3); // Load 3 more tables
   };
 
@@ -330,16 +329,11 @@ export default function PartsTable() {
     loadData();
   }, [trigger]);
 
-  
-
- 
-
-
-
   useEffect(() => {
     const handleScroll = () => {
-      const scrollEnd = (window.innerHeight + window.scrollY) >= document.body.offsetHeight - 50;
-      
+      const scrollEnd =
+        window.innerHeight + window.scrollY >= document.body.offsetHeight - 50;
+
       if (scrollEnd && !isLoading) {
         setIsLoading(true); // Set loading to true to prevent further calls
         loadMoreTables();
@@ -369,33 +363,57 @@ export default function PartsTable() {
               // overflowX:"hidden",
               // overflowY:"hidden"
             }}
-            
+            ref={componentRef}
           >
             <div
               style={{ display: "flex", gap: "10px", flexDirection: "column" }}
             >
-              {Object.entries(data).map(([k, v]) =>
-                Object.entries(v as Record<string, object>)
-                  .slice(0, loadedTables)
-                  .map(([key, value]) => (
-                    <div
-                      key={`${key}-${phase}`}
-                      onMouseEnter={() => setHoveredKey(key)}
-                    >
-                      <Suspense fallback={<CircularProgress />}>
-                        <SvgwithTable
-                          key={`${key}`}
-                          block_name={key}
-                          parts_object={value}
-                          phase_qty={value["phase"][phase]}
-                          dark_mode={isDarkMode}
-                          setPos={setPositions}
-                          pos={positions}
-                        />
-                      </Suspense>
-                    </div>
-                  ))
-              )}
+              {
+                isPrinting?(Object.entries(data).map(([k, v]) =>
+                  Object.entries(v as Record<string, object>)
+                    .map(([key, value]) => (
+                      <div
+                        key={`${key}-${phase}`}
+                        onMouseEnter={() => setHoveredKey(key)}
+                      >
+                        <Suspense fallback={<CircularProgress />}>
+                          <SvgwithTable
+                            key={`${key}`}
+                            block_name={key}
+                            parts_object={value}
+                            phase_qty={value["phase"][phase]}
+                            dark_mode={isDarkMode}
+                            setPos={setPositions}
+                            pos={positions}
+                          />
+                        </Suspense>
+                      </div>
+                    ))
+                )):(Object.entries(data).map(([k, v]) =>
+                  Object.entries(v as Record<string, object>)
+                    .slice(0, loadedTables)
+                    .map(([key, value]) => (
+                      <div
+                        key={`${key}-${phase}`}
+                        onMouseEnter={() => setHoveredKey(key)}
+                      >
+                        <Suspense fallback={<CircularProgress />}>
+                          <SvgwithTable
+                            key={`${key}`}
+                            block_name={key}
+                            parts_object={value}
+                            phase_qty={value["phase"][phase]}
+                            dark_mode={isDarkMode}
+                            setPos={setPositions}
+                            pos={positions}
+                          />
+                        </Suspense>
+                      </div>
+                    ))
+                ))
+
+              }
+      
             </div>
           </div>
           {isPrinting ? null : (
