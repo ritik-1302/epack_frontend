@@ -34,6 +34,7 @@ export function UploadFile({ project_list }) {
   const [loading, setLoading] = useState<boolean>(false);
   const [existingProject, setExistingProject] = useState("");
   const [newProjectName, setNewProjectName] = useState("");
+  const [lineWeight, setLineWeight] = useState<string>("");
   const router = useRouter();
 
   console.log("From upload Component", project_list);
@@ -91,6 +92,16 @@ export function UploadFile({ project_list }) {
       return;
     }
 
+    if(parseInt(lineWeight)<1 ||parseInt(lineWeight)>4){
+      alert("Line Weight must be between 1 and 4");
+      return;
+    }
+
+    if (lineWeight.trim() === "" || isNaN(parseInt(lineWeight))) {
+      alert("Please enter a proper value for lineweight");
+      return;
+    }
+
     const formData = new FormData();
     if (file !== null) {
       formData.append("file", file);
@@ -102,6 +113,7 @@ export function UploadFile({ project_list }) {
     formData.append("width", (3508).toString());
     formData.append("filename", uploadedFile.name);
     formData.append("username", localStorage.getItem("username")!);
+    formData.append("lineweight", lineWeight);
     if (newProjectName === "") {
       formData.append("projectName", existingProject);
     } else {
@@ -150,7 +162,7 @@ export function UploadFile({ project_list }) {
         const data = await response.json();
         console.log("Data:", data);
         localStorage.setItem("filename", data["file_name"]);
-        localStorage.removeItem("table_metadata")
+        localStorage.removeItem("table_metadata");
 
         setLoading(false);
         router.push("/parts_table");
@@ -202,6 +214,16 @@ export function UploadFile({ project_list }) {
             value={density}
             onChange={(event) => setDensity(event.target.value)}
             placeholder="Density"
+          />
+          <Label htmlFor="density" className="text-sm">
+            Lineweight
+          </Label>
+          <Input
+            id="lineweight"
+            type="text"
+            value={lineWeight}
+            onChange={(event) => setLineWeight(event.target.value)}
+            placeholder="Lineweight"
           />
           <div className="flex flex-col gap-1.5 justify-center w-full">
             <label
