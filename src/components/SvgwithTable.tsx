@@ -54,6 +54,7 @@ export default function SvgwithTable({
       {
         accessorKey: "Weight (kg)",
         header: "Weight (kg)",
+        accessorFn: (row)=>row["Weight (kg)"]*row["Quantity"]
       },
       {
         accessorKey: "Area (m2)",
