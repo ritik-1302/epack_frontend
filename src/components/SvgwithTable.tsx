@@ -30,6 +30,7 @@ export default function SvgwithTable({
       {
         accessorKey: "Part Name",
         header: "Part Name",
+        sortDescFirst: false,
       },
       {
         accessorKey: "Length (mm)",
@@ -82,7 +83,16 @@ export default function SvgwithTable({
       columns,
       data: data,
       enablePagination: false,
-      enableEditing: true,
+      enableEditing: false,
+      initialState: {
+        sorting: [
+          {
+            id: 'Part Name', 
+            desc: false,
+          },
+          
+        ],
+      },
       editDisplayMode: 'cell', 
       state:{
         density:'compact'
