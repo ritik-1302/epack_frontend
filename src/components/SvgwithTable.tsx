@@ -6,6 +6,7 @@ import {
 } from "material-react-table";
 import { Rnd } from "react-rnd";
 import { Button } from "@/components/ui/button";
+import { access } from "fs";
 
 export default function SvgwithTable({
   block_name,
@@ -54,11 +55,18 @@ export default function SvgwithTable({
       {
         accessorKey: "Weight (kg)",
         header: "Weight (kg)",
-        accessorFn: (row)=>row["Weight (kg)"]*row["Quantity"]
+        // accessorFn: (row)=>row["Weight (kg)"]*row["Quantity"]
+        // #limit to 2 decimal places
+
+        accessorFn: (row) => {
+          const weight = row["Weight (kg)"] * row["Quantity"];
+          return weight.toFixed(2);
+        }
       },
       {
         accessorKey: "Area (m2)",
         header: "Area (m2)",
+        accessorFn: (row)=>row["Area (m2)"]*row["Quantity"]
       },
       {
         accessorKey: "Yield",
