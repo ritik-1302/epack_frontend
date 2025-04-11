@@ -61,6 +61,10 @@ export default function SvgwithTable({
         header: "Area (m2)",
       },
       {
+        accessorKey: "Yield",
+        header: "Yield",
+      },
+      {
         accessorKey: "Volume (m3)",
         header: "Volume (m3)",
       },

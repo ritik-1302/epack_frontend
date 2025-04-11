@@ -214,6 +214,7 @@ export default function PartsTable() {
       );
       if (response.status == 200) {
         const json_body = await response.json();
+        console.log("File fetched successfully", json_body);
         setData(json_body);
 
         const phases: string[] = [];
